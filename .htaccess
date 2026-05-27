@@ -1,0 +1,12 @@
+Options -Indexes
+RewriteEngine On
+
+# Protect sensitive directories from direct web access
+RewriteRule ^(includes|data|original_exercises)(/|$) - [F,L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "same-origin"
+</IfModule>
