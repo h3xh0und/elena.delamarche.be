@@ -60,6 +60,16 @@ if ($actie === 'max_getal') {
     }
     echo json_encode(['ok' => true, 'bericht' => 'Instelling opgeslagen!']);
 
+} elseif ($actie === 'sneltest_score') {
+    $score = (int)($_POST['score'] ?? 0);
+    if ($score < 0 || $score > 500) {
+        echo json_encode(['ok' => false, 'fout' => 'Ongeldige score']);
+        exit;
+    }
+    $nieuwRecord = slaSneltestHighscoreOp($kind, $score);
+    $highscore   = leesSneltestHighscore($kind);
+    echo json_encode(['ok' => true, 'nieuw_record' => $nieuwRecord, 'highscore' => $highscore]);
+
 } elseif ($actie === 'sprongen_stap') {
     $stap = (int)($_POST['sprongen_stap'] ?? 2);
     if (!slaSprongenStapOp($kind, $stap)) {

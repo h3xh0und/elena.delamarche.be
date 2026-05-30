@@ -84,6 +84,21 @@ function slaKlokNiveauOp(string $naam, string $niveau): bool {
     return _schrijfJson(_gebruikerPad($naam), $data);
 }
 
+function leesSneltestHighscore(string $naam): int {
+    $data = _leesJson(_gebruikerPad($naam));
+    return (int)($data['sneltest_highscore'] ?? 0);
+}
+
+function slaSneltestHighscoreOp(string $naam, int $score): bool {
+    $data = _leesJson(_gebruikerPad($naam));
+    if (!$data) return false;
+    if ($score > (int)($data['sneltest_highscore'] ?? 0)) {
+        $data['sneltest_highscore'] = $score;
+        return _schrijfJson(_gebruikerPad($naam), $data);
+    }
+    return false;
+}
+
 function leesSprongenStap(string $naam): int {
     $data = _leesJson(_gebruikerPad($naam));
     return (int)($data['sprongen_stap'] ?? 2);

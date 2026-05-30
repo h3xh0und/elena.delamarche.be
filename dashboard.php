@@ -5,8 +5,9 @@ require_once 'includes/flatfile.php';
 vereisInlog();
 
 global $CATEGORIEEN;
-$kind      = huidigKind();
-$voortgang = leesVoortgang($kind);
+$kind              = huidigKind();
+$voortgang         = leesVoortgang($kind);
+$sneltestHighscore = leesSneltestHighscore($kind);
 
 function sterren(int $correct): string {
     $vol   = min(5, intdiv($correct, 10));
@@ -51,7 +52,12 @@ function voortgangBalk(array $stats): string {
 <a href="sneltest.php" class="oefening-kaart sneltest-kaart">
     <div class="oef-emoji">⚡</div>
     <div class="oef-naam">Sneltest</div>
+    <?php if ($sneltestHighscore > 0): ?>
+    <div class="oef-sterren">🏆 <?= $sneltestHighscore ?></div>
+    <div class="oef-score">record</div>
+    <?php else: ?>
     <div class="oef-nieuw">2 minuten</div>
+    <?php endif; ?>
 </a>
 
 <?php foreach ($CATEGORIEEN as $vakKey => $vak): foreach ($vak['oefeningen'] as $oefeningKey => $oef):

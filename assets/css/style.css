@@ -830,6 +830,20 @@ input  { font-family: var(--font); }
 .snel-eind-pct      { font-size: 1.3rem; font-weight: 800; color: var(--tekst); margin-bottom: 1.5rem; }
 .snel-eind-knoppen  { display: flex; gap: 1rem; justify-content: center; }
 
+.snel-huidig-record {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--oranje);
+  margin-bottom: 1.25rem;
+}
+.snel-nieuw-record {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--oranje);
+  margin-bottom: 1rem;
+  animation: pulse .6s 3;
+}
+
 /* ── Responsive tweaks ────────────────────────────────── */
 @media (max-width: 480px) {
   .oef-vraag-tekst  { font-size: 1.6rem; }

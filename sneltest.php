@@ -3,8 +3,9 @@ require_once 'includes/auth.php';
 
 vereisInlog();
 
-$kind = huidigKind();
-$csrf = csrfToken();
+$kind      = huidigKind();
+$csrf      = csrfToken();
+$highscore = leesSneltestHighscore($kind);
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -36,6 +37,9 @@ $csrf = csrfToken();
             <div class="snel-groot-emoji">⚡</div>
             <h2 class="snel-titel">Sneltest</h2>
             <p class="snel-uitleg">Maak zoveel mogelijk sommen<br>in <strong>2 minuten</strong>!</p>
+            <?php if ($highscore > 0): ?>
+            <div class="snel-huidig-record">🏆 Jouw record: <strong><?= $highscore ?></strong></div>
+            <?php endif; ?>
             <button id="start-knop" class="btn btn-primair btn-groot snel-start-knop">Start!</button>
         </div>
     </div>
@@ -63,6 +67,7 @@ $csrf = csrfToken();
             </div>
             <div class="snel-eind-pogingen">van <span id="eind-totaal">0</span> pogingen</div>
             <div id="eind-pct" class="snel-eind-pct"></div>
+            <div id="nieuw-record" class="snel-nieuw-record verborgen">🎉 Nieuw record!</div>
             <div class="snel-eind-knoppen">
                 <button id="opnieuw-knop" class="btn btn-primair btn-groot">Opnieuw ↺</button>
                 <a href="dashboard.php" class="btn btn-groot btn-uitlog">Dashboard</a>
@@ -98,6 +103,7 @@ const el = {
     eindTotaal:   document.getElementById('eind-totaal'),
     eindPct:      document.getElementById('eind-pct'),
     eindEmoji:    document.getElementById('eind-emoji'),
+    nieuwRecord:  document.getElementById('nieuw-record'),
 };
 
 document.getElementById('start-knop').addEventListener('click', startTest);
@@ -194,6 +200,18 @@ function eindTest() {
     if      (pct >= 90) el.eindEmoji.textContent = '🏆';
     else if (pct >= 70) el.eindEmoji.textContent = '⭐';
     else                el.eindEmoji.textContent = '💪';
+
+    // Highscore opslaan
+    const fd = new FormData();
+    fd.append('actie', 'sneltest_score');
+    fd.append('score', scoreCorrect);
+    fetch('api/instellingen.php', { method: 'POST', headers: { 'X-CSRF-Token': CSRF }, body: fd })
+        .then(r => r.json())
+        .then(data => {
+            if (data.nieuw_record) {
+                el.nieuwRecord.classList.remove('verborgen');
+            }
+        });
 }
 </script>
 
