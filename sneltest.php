@@ -48,7 +48,7 @@ $highscore = leesSneltestHighscore($kind);
 
         <!-- Cirkeltimer -->
         <div class="snel-ring-wrapper">
-            <svg class="snel-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <svg class="snel-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
                 <circle class="ring-bg"   cx="60" cy="60" r="50"/>
                 <circle class="ring-prog" cx="60" cy="60" r="50" id="ring-prog"/>
             </svg>

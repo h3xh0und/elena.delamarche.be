@@ -786,11 +786,17 @@ input  { font-family: var(--font); }
 /* Cirkel timer */
 .snel-ring-wrapper {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 120px;
+  height: 120px;
   margin: 0 auto 1.25rem;
 }
-.snel-ring { width: 160px; height: 160px; transform: rotate(-90deg); }
+.snel-ring {
+  display: block;
+  width: 120px;
+  height: 120px;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
 .ring-bg   { fill: none; stroke: var(--rand); stroke-width: 10; }
 .ring-prog {
   fill: none;
@@ -806,9 +812,10 @@ input  { font-family: var(--font); }
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 900;
   color: var(--tekst);
+  pointer-events: none;
 }
 
 .snel-live-score {
