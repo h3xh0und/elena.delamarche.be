@@ -757,29 +757,7 @@ input  { font-family: var(--font); }
 .sneltest-kaart .oef-nieuw { background: rgba(255,255,255,.25); color: #fff; }
 .sneltest-kaart:hover      { border-color: #fff !important; }
 
-/* ── Sneltest pagina ──────────────────────────────────── */
-.sneltest-main {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 56px);
-  padding: 1.5rem 1rem;
-}
-
-.snel-fase { width: 100%; max-width: 420px; }
-
-.snel-kaart {
-  background: var(--kaart);
-  border-radius: var(--radius);
-  box-shadow: var(--schaduw-groot);
-  padding: 2.5rem 2rem;
-  text-align: center;
-}
-
-.snel-groot-emoji { font-size: 4rem; line-height: 1; margin-bottom: .5rem; }
-.snel-titel       { font-size: 2rem; font-weight: 900; margin-bottom: .75rem; }
-.snel-uitleg      { font-size: 1.1rem; color: var(--tekst-zacht); margin-bottom: 1.25rem; line-height: 1.5; }
-.snel-start-knop  { font-size: 1.4rem; padding: 1rem 3rem; width: auto; margin-top: 0; }
+/* ── Sneltest ─────────────────────────────────────────── */
 
 /* Cirkel timer */
 .snel-ring-wrapper {
@@ -857,25 +835,6 @@ input  { font-family: var(--font); }
 
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.06); } }
 
-.snel-eind-score    { font-size: 4rem; font-weight: 900; color: var(--primair); margin: 1rem 0 .25rem; }
-.snel-eind-label    { font-size: 1.4rem; font-weight: 700; color: var(--tekst-zacht); }
-.snel-eind-pogingen { font-size: 1rem; color: var(--tekst-zacht); margin-bottom: .5rem; }
-.snel-eind-pct      { font-size: 1.3rem; font-weight: 800; color: var(--tekst); margin-bottom: 1rem; }
-.snel-eind-knoppen  { display: flex; gap: 1rem; justify-content: center; margin-top: 1.25rem; }
-
-.snel-huidig-record {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--oranje);
-  margin-bottom: 1.25rem;
-}
-.snel-nieuw-record {
-  font-size: 1.3rem;
-  font-weight: 900;
-  color: var(--oranje);
-  margin-bottom: 1rem;
-  animation: pulse .6s 3;
-}
 
 /* ── Responsive tweaks ────────────────────────────────── */
 @media (max-width: 480px) {
