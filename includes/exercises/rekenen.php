@@ -279,6 +279,24 @@ function rWisselsom(int $max = 20): array {
         : ['type' => 'invul', 'label' => "$a + $b = $som", 'vraag' => "$som − $a = ?", 'antwoord' => (string)$b, 'invoer' => 'getal'];
 }
 
+function rSneltest(int $max = 20): array {
+    $mx  = max(10, $max);
+    $min = max(2, (int)($mx / 10));
+    $type = rand(0, 2);
+    if ($type <= 1) {
+        // optellen: beide >= $min, som <= $mx
+        $a = rand($min, $mx - $min);
+        $b = rand($min, $mx - $a);
+        return ['type' => 'invul', 'vraag' => "$a + $b = ?",
+                'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
+    }
+    // aftrekken: resultaat >= $min
+    $a = rand($min * 2, $mx);
+    $b = rand($min, $a - $min);
+    return ['type' => 'invul', 'vraag' => "$a − $b = ?",
+            'antwoord' => (string)($a - $b), 'invoer' => 'getal'];
+}
+
 function rGeld(): array {
     if (rand(0, 1)) {
         $betaalPool = [5, 10, 20];

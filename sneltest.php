@@ -53,8 +53,12 @@ $highscore = leesSneltestHighscore($kind);
 
         <div class="snel-ring-wrapper">
             <svg class="snel-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-                <circle class="ring-bg"   cx="60" cy="60" r="50"/>
-                <circle class="ring-prog" cx="60" cy="60" r="50" id="ring-prog"/>
+                <circle cx="60" cy="60" r="50"
+                        fill="none" stroke="#e2e8f0" stroke-width="10"/>
+                <circle id="ring-prog" cx="60" cy="60" r="50"
+                        fill="none" stroke="#22c55e" stroke-width="10"
+                        stroke-linecap="round"
+                        stroke-dasharray="314.16" stroke-dashoffset="0"/>
             </svg>
             <div class="snel-ring-tijd" id="snel-timer">2:00</div>
         </div>
@@ -110,7 +114,7 @@ let resterend     = DUUR;
 let scoreCorrect  = 0;
 let scoreTotaal   = 0;
 let bezig         = false;
-let vorigeVraag   = '';
+let vraagHistory  = [];
 
 const el = {
     faseStart:   document.getElementById('fase-start'),
@@ -147,7 +151,7 @@ async function startTest() {
     scoreCorrect = 0;
     scoreTotaal  = 0;
     bezig        = true;
-    vorigeVraag  = '';
+    vraagHistory = [];
 
     el.faseStart.classList.add('verborgen');
     el.faseBezig.classList.remove('verborgen');
@@ -181,12 +185,13 @@ async function laadVraag() {
     try {
         let data, pogingen = 0;
         do {
-            const res = await fetch('api/oefening.php?cat=gemengd');
+            const res = await fetch('api/oefening.php?cat=sneltest');
             data = await res.json();
             pogingen++;
-        } while (data.vraag === vorigeVraag && pogingen < 4);
+        } while (vraagHistory.includes(data.vraag) && pogingen < 6);
 
-        vorigeVraag          = data.vraag;
+        vraagHistory.push(data.vraag);
+        if (vraagHistory.length > 12) vraagHistory.shift();
         el.vraag.textContent = data.vraag || '';
         el.input.value       = '';
         el.indienen.disabled = true;

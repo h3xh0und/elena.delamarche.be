@@ -27,7 +27,9 @@ $maxGetal     = leesMaxGetal($kind);
 $klokNiveau   = leesKlokNiveau($kind);
 $sprongenStap = leesSprongenStap($kind);
 
-if (in_array($cat, $rekenTypes)) {
+if ($cat === 'sneltest') {
+    $oefening = rSneltest($maxGetal);
+} elseif (in_array($cat, $rekenTypes)) {
     $oefening = genereerRekenOefening($cat, $maxGetal, $klokNiveau, $sprongenStap);
 } else {
     http_response_code(400);
