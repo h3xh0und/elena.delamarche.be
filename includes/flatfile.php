@@ -84,6 +84,20 @@ function slaKlokNiveauOp(string $naam, string $niveau): bool {
     return _schrijfJson(_gebruikerPad($naam), $data);
 }
 
+function leesSprongenStap(string $naam): int {
+    $data = _leesJson(_gebruikerPad($naam));
+    return (int)($data['sprongen_stap'] ?? 2);
+}
+
+function slaSprongenStapOp(string $naam, int $stap): bool {
+    $geldig = [2, 3, 5, 10];
+    if (!in_array($stap, $geldig)) return false;
+    $data = _leesJson(_gebruikerPad($naam));
+    if (!$data) return false;
+    $data['sprongen_stap'] = $stap;
+    return _schrijfJson(_gebruikerPad($naam), $data);
+}
+
 function leesVoortgang(string $naam): array {
     return _leesJson(_voortgangPad($naam)) ?? [];
 }

@@ -4,9 +4,10 @@ require_once 'includes/flatfile.php';
 
 vereisInlog();
 
-$kind       = huidigKind();
-$maxGetal   = leesMaxGetal($kind);
-$klokNiveau = leesKlokNiveau($kind);
+$kind         = huidigKind();
+$maxGetal     = leesMaxGetal($kind);
+$klokNiveau   = leesKlokNiveau($kind);
+$sprongenStap = leesSprongenStap($kind);
 $csrf       = csrfToken();
 
 $klokNiveaus = [
@@ -76,6 +77,23 @@ $klokNiveaus = [
             <?php endforeach; ?>
         </div>
         <button class="btn btn-primair" id="sla-klok-op" style="margin-top:1rem">
+            Opslaan
+        </button>
+    </div>
+
+    <!-- Sprongen stap -->
+    <div class="inst-kaart">
+        <h2 class="inst-titel">🐸 Sprongen — stapgrootte</h2>
+        <p class="inst-omschrijving">Kies hoe groot de stappen zijn bij de sprong-oefeningen.</p>
+        <div class="getal-knoppen" id="sprongen-knoppen">
+            <?php foreach ([2, 3, 5, 10] as $opt): ?>
+            <button class="getal-keuze-knop <?= $opt === $sprongenStap ? 'actief' : '' ?>"
+                    data-stap="<?= $opt ?>">
+                stap <?= $opt ?>
+            </button>
+            <?php endforeach; ?>
+        </div>
+        <button class="btn btn-primair" id="sla-sprongen-op" style="margin-top:1rem">
             Opslaan
         </button>
     </div>
@@ -150,6 +168,26 @@ document.getElementById('wijzig-pin').addEventListener('click', async () => {
         document.getElementById('nieuwe-pin').value  = '';
         document.getElementById('herhaal-pin').value = '';
     }
+});
+
+// ── Sprongen stap ───────────────────────────────────────
+let gekozenStap = <?= $sprongenStap ?>;
+
+document.querySelectorAll('#sprongen-knoppen .getal-keuze-knop').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#sprongen-knoppen .getal-keuze-knop').forEach(b => b.classList.remove('actief'));
+        btn.classList.add('actief');
+        gekozenStap = parseInt(btn.dataset.stap);
+    });
+});
+
+document.getElementById('sla-sprongen-op').addEventListener('click', async () => {
+    const fd = new FormData();
+    fd.append('actie', 'sprongen_stap');
+    fd.append('sprongen_stap', gekozenStap);
+    const res  = await fetch('api/instellingen.php', { method:'POST', headers:{'X-CSRF-Token':CSRF}, body:fd });
+    const data = await res.json();
+    toonMelding(data.ok, data.bericht || data.fout);
 });
 
 // ── Klok niveau ─────────────────────────────────────────

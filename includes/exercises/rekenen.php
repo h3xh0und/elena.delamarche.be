@@ -1,31 +1,33 @@
 <?php
 
-function genereerRekenOefening(string $type, int $maxGetal = 20, string $klokNiveau = 'uur'): array {
-    $mx = max(10, $maxGetal); // minimum 10
+function genereerRekenOefening(string $type, int $maxGetal = 20, string $klokNiveau = 'uur', int $sprongenStap = 2): array {
+    $mx = max(10, $maxGetal);
     return match ($type) {
-        'optellen_10'   => rOptellen(1, min(9, $mx - 1), min(10, $mx)),
-        'optellen_20'   => rOptellen(2, $mx - 1, $mx),
-        'aftrekken_20'  => rAftrekken($mx),
-        'gemengd'       => rGemengd($mx),
-        'drie_optellen' => rDrieOptellen($mx),
-        'tellen_buren'  => rTellenBuren($mx),
-        'splitsen'      => rSplitsen(),
-        'de_helft'      => rHelft($mx),
-        'vergelijken'   => rVergelijken($mx),
-        'ordenen'       => rOrdenen($mx),
-        'klok'          => rKlok($klokNiveau),
-        'sprongen_2'    => rSprongen2($mx),
-        'rekenslang'    => rRekenslang($mx),
-        default         => rOptellen(1, 9, 10),
+        'optellen'       => rOptellen($mx),
+        'aftrekken'      => rAftrekken($mx),
+        'gemengd'        => rGemengd($mx),
+        'drie_optellen'  => rDrieOptellen($mx),
+        'tellen_buren'   => rTellenBuren($mx),
+        'splitsen'       => rSplitsen($mx),
+        'de_helft'       => rHelft($mx),
+        'vergelijken'    => rVergelijken($mx),
+        'ordenen'        => rOrdenen($mx),
+        'klok'           => rKlok($klokNiveau),
+        'sprongen'       => rSprongen($mx, $sprongenStap),
+        'rekenslang'     => rRekenslang($mx),
+        'aftrekken_brug' => rAftrekkenBrug($mx),
+        'ontbrekend'     => rOntbrekend($mx),
+        'wisselsom'      => rWisselsom($mx),
+        'geld'           => rGeld(),
+        default          => rOptellen($mx),
     };
 }
 
 /* ── Helpers ──────────────────────────────────────────── */
 
-function rOptellen(int $minA, int $maxA, int $maxSom): array {
-    $a = rand(1, min($maxA, $maxSom - 1));
-    $maxB = $maxSom - $a;
-    $b = rand(1, max(1, min($maxA, $maxB)));
+function rOptellen(int $max = 20): array {
+    $a = rand(1, $max - 1);
+    $b = rand(1, $max - $a);
     return [
         'type'     => 'invul',
         'vraag'    => "$a + $b = ?",
@@ -95,8 +97,8 @@ function rTellenBuren(int $max = 20): array {
             'antwoord' => (string)$ant, 'invoer' => 'getal'];
 }
 
-function rSplitsen(): array {
-    $n = rand(5, 10); // splitsen altijd binnen 10
+function rSplitsen(int $max = 20): array {
+    $n = rand(3, $max);
     $a = rand(1, $n - 1);
     $b = $n - $a;
     if (rand(0, 1)) {
@@ -212,25 +214,106 @@ function _klokTijdStr(int $uur, int $minuten, bool $digitaal): string {
     };
 }
 
-function rSprongen2(int $max = 20): array {
-    $cap   = max(10, $max);
-    $maxStart = (int)($cap / 2) - 4;
-    $maxStart = max(1, $maxStart);
-    $start = rand(1, $maxStart) * 2;
-    $seq   = [$start, $start+2, $start+4, $start+6, $start+8];
-    $seq   = array_values(array_filter($seq, fn($v) => $v <= $cap));
-    if (count($seq) < 4) $seq = [2, 4, 6, 8, 10];
-    $seq   = array_slice($seq, 0, 5);
-    $pos   = rand(0, count($seq) - 1);
-    $ant   = $seq[$pos];
+function rSprongen(int $max = 20, int $stap = 2): array {
+    $cap      = max($stap * 5, $max);
+    $maxStart = max(1, (int)(($cap - $stap * 4) / $stap));
+    $start    = rand(1, $maxStart) * $stap;
+    $seq      = array_values(array_filter(
+        array_map(fn($i) => $start + $i * $stap, range(0, 4)),
+        fn($v) => $v <= $cap
+    ));
+    if (count($seq) < 4) $seq = array_map(fn($i) => $i * $stap, range(1, 5));
+    $seq     = array_slice($seq, 0, 5);
+    $pos     = rand(0, count($seq) - 1);
+    $ant     = $seq[$pos];
     $display = $seq;
     $display[$pos] = '?';
     return [
         'type'     => 'invul',
-        'label'    => 'Wat is het ontbrekende getal?',
+        'label'    => "Sprongen van $stap:",
         'vraag'    => implode('  →  ', $display),
         'antwoord' => (string)$ant,
         'invoer'   => 'getal',
+    ];
+}
+
+function rAftrekkenBrug(int $max = 20): array {
+    $a    = rand(11, min($max, 19));
+    $minB = $a - 9;
+    $maxB = min($a - 1, 9);
+    $b    = rand($minB, $maxB);
+    return [
+        'type'     => 'invul',
+        'vraag'    => "$a − $b = ?",
+        'antwoord' => (string)($a - $b),
+        'invoer'   => 'getal',
+    ];
+}
+
+function rOntbrekend(int $max = 20): array {
+    if (rand(0, 1)) {
+        $som = rand(4, $max);
+        $a   = rand(1, $som - 1);
+        $b   = $som - $a;
+        return rand(0, 1)
+            ? ['type' => 'invul', 'vraag' => "$a + ? = $som", 'antwoord' => (string)$b, 'invoer' => 'getal']
+            : ['type' => 'invul', 'vraag' => "? + $b = $som", 'antwoord' => (string)$a, 'invoer' => 'getal'];
+    }
+    $a        = rand(4, $max);
+    $b        = rand(1, $a - 1);
+    $verschil = $a - $b;
+    return rand(0, 1)
+        ? ['type' => 'invul', 'vraag' => "$a − ? = $verschil", 'antwoord' => (string)$b, 'invoer' => 'getal']
+        : ['type' => 'invul', 'vraag' => "? − $b = $verschil", 'antwoord' => (string)$a, 'invoer' => 'getal'];
+}
+
+function rWisselsom(int $max = 20): array {
+    $a   = rand(2, max(2, (int)($max / 2)));
+    $b   = rand(1, $max - $a);
+    $som = $a + $b;
+    return rand(0, 1)
+        ? ['type' => 'invul', 'label' => "$a + $b = $som", 'vraag' => "$som − $b = ?", 'antwoord' => (string)$a, 'invoer' => 'getal']
+        : ['type' => 'invul', 'label' => "$a + $b = $som", 'vraag' => "$som − $a = ?", 'antwoord' => (string)$b, 'invoer' => 'getal'];
+}
+
+function rGeld(): array {
+    if (rand(0, 1)) {
+        $betaalPool = [5, 10, 20];
+        $betaal     = $betaalPool[array_rand($betaalPool)];
+        $kost       = rand(1, $betaal - 1);
+        $terug      = $betaal - $kost;
+        $goed       = "€$terug";
+        $opties     = [$goed];
+        $poging     = 0;
+        while (count($opties) < 4 && $poging++ < 100) {
+            $v = "€" . rand(1, $betaal);
+            if (!in_array($v, $opties)) $opties[] = $v;
+        }
+        shuffle($opties);
+        return [
+            'type'     => 'keuze',
+            'label'    => "Je betaalt met €$betaal.",
+            'vraag'    => "Iets kost €$kost. Hoeveel wisselgeld?",
+            'opties'   => $opties,
+            'antwoord' => $goed,
+        ];
+    }
+    $a      = rand(1, 10);
+    $b      = rand(1, 10);
+    $som    = $a + $b;
+    $goed   = "€$som";
+    $opties = [$goed];
+    $poging = 0;
+    while (count($opties) < 4 && $poging++ < 100) {
+        $v = "€" . rand(1, 20);
+        if (!in_array($v, $opties)) $opties[] = $v;
+    }
+    shuffle($opties);
+    return [
+        'type'     => 'keuze',
+        'vraag'    => "€$a + €$b = ?",
+        'opties'   => $opties,
+        'antwoord' => $goed,
     ];
 }
 

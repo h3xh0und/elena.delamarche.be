@@ -60,6 +60,14 @@ if ($actie === 'max_getal') {
     }
     echo json_encode(['ok' => true, 'bericht' => 'Instelling opgeslagen!']);
 
+} elseif ($actie === 'sprongen_stap') {
+    $stap = (int)($_POST['sprongen_stap'] ?? 2);
+    if (!slaSprongenStapOp($kind, $stap)) {
+        echo json_encode(['ok' => false, 'fout' => 'Ongeldige waarde']);
+        exit;
+    }
+    echo json_encode(['ok' => true, 'bericht' => 'Instelling opgeslagen!']);
+
 } else {
     echo json_encode(['ok' => false, 'fout' => 'Onbekende actie']);
 }

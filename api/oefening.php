@@ -3,7 +3,6 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/flatfile.php';
 require_once __DIR__ . '/../includes/exercises/rekenen.php';
-require_once __DIR__ . '/../includes/exercises/taal.php';
 
 header('Content-Type: application/json');
 
@@ -22,16 +21,14 @@ if (!$cat) {
 
 global $CATEGORIEEN;
 $rekenTypes = array_keys($CATEGORIEEN['rekenen']['oefeningen']);
-$taalTypes  = array_keys($CATEGORIEEN['taal']['oefeningen']);
 
-$kind       = huidigKind();
-$maxGetal   = leesMaxGetal($kind);
-$klokNiveau = leesKlokNiveau($kind);
+$kind         = huidigKind();
+$maxGetal     = leesMaxGetal($kind);
+$klokNiveau   = leesKlokNiveau($kind);
+$sprongenStap = leesSprongenStap($kind);
 
 if (in_array($cat, $rekenTypes)) {
-    $oefening = genereerRekenOefening($cat, $maxGetal, $klokNiveau);
-} elseif (in_array($cat, $taalTypes)) {
-    $oefening = genereerTaalOefening($cat);
+    $oefening = genereerRekenOefening($cat, $maxGetal, $klokNiveau, $sprongenStap);
 } else {
     http_response_code(400);
     echo json_encode(['fout' => 'Onbekende categorie']);
