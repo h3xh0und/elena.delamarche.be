@@ -24,15 +24,4 @@ $CATEGORIEEN = [
             'rekenslang'    => ['naam' => 'Rekenslang',         'emoji' => '🐍'],
         ],
     ],
-    'taal' => [
-        'naam'  => 'Taal',
-        'kleur' => 'groen',
-        'emoji' => '📚',
-        'oefeningen' => [
-            'rijmwoorden'    => ['naam' => 'Rijmwoorden',        'emoji' => '🎵'],
-            'lettergrepen'   => ['naam' => 'Lettergrepen',       'emoji' => '📝'],
-            'hoort_niet_bij' => ['naam' => 'Hoort er niet bij',  'emoji' => '🚫'],
-            'tegengestelde'  => ['naam' => 'Tegengestelde',      'emoji' => '↔️'],
-        ],
-    ],
 ];

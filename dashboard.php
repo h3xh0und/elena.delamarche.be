@@ -46,31 +46,26 @@ function voortgangBalk(array $stats): string {
 
 <main class="dashboard">
 
-<?php foreach ($CATEGORIEEN as $vakKey => $vak): ?>
-<section class="vak-sectie vak-<?= $vak['kleur'] ?>">
-    <h2 class="vak-titel"><?= $vak['emoji'] ?> <?= htmlspecialchars($vak['naam']) ?></h2>
-    <div class="oefeningen-grid">
-    <?php foreach ($vak['oefeningen'] as $oefeningKey => $oef):
-        $stats   = $voortgang[$oefeningKey] ?? null;
-        $gedaan  = $stats['gedaan']  ?? 0;
-        $correct = $stats['correct'] ?? 0;
-        $actief  = $gedaan > 0;
-    ?>
-    <a href="oefening.php?cat=<?= $oefeningKey ?>" class="oefening-kaart <?= $actief ? 'heeft-voortgang' : '' ?>">
-        <div class="oef-emoji"><?= $oef['emoji'] ?></div>
-        <div class="oef-naam"><?= htmlspecialchars($oef['naam']) ?></div>
-        <?php if ($actief): ?>
-        <div class="oef-sterren"><?= sterren($correct) ?></div>
-        <?php echo voortgangBalk($stats); ?>
-        <div class="oef-score"><?= $correct ?>/<?= $gedaan ?> correct</div>
-        <?php else: ?>
-        <div class="oef-nieuw">Nog niet gedaan</div>
-        <?php endif; ?>
-    </a>
-    <?php endforeach; ?>
-    </div>
-</section>
-<?php endforeach; ?>
+<div class="oefeningen-grid">
+<?php foreach ($CATEGORIEEN as $vakKey => $vak): foreach ($vak['oefeningen'] as $oefeningKey => $oef):
+    $stats   = $voortgang[$oefeningKey] ?? null;
+    $gedaan  = $stats['gedaan']  ?? 0;
+    $correct = $stats['correct'] ?? 0;
+    $actief  = $gedaan > 0;
+?>
+<a href="oefening.php?cat=<?= $oefeningKey ?>" class="oefening-kaart <?= $actief ? 'heeft-voortgang' : '' ?>">
+    <div class="oef-emoji"><?= $oef['emoji'] ?></div>
+    <div class="oef-naam"><?= htmlspecialchars($oef['naam']) ?></div>
+    <?php if ($actief): ?>
+    <div class="oef-sterren"><?= sterren($correct) ?></div>
+    <?php echo voortgangBalk($stats); ?>
+    <div class="oef-score"><?= $correct ?>/<?= $gedaan ?> correct</div>
+    <?php else: ?>
+    <div class="oef-nieuw">Nog niet gedaan</div>
+    <?php endif; ?>
+</a>
+<?php endforeach; endforeach; ?>
+</div>
 
 </main>
 

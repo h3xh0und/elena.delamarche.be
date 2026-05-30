@@ -203,20 +203,22 @@ input  { font-family: var(--font); }
 
 .oefeningen-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: .85rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
 }
 
 .oefening-kaart {
   background: var(--kaart);
   border-radius: var(--radius);
   box-shadow: var(--schaduw);
-  padding: 1.1rem .9rem;
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  gap: .35rem;
+  gap: .4rem;
+  padding: 1rem;
   transition: transform .18s, box-shadow .18s;
   border: 2.5px solid transparent;
   -webkit-tap-highlight-color: transparent;
@@ -224,14 +226,12 @@ input  { font-family: var(--font); }
 .oefening-kaart:hover, .oefening-kaart:focus {
   transform: translateY(-3px);
   box-shadow: var(--schaduw-groot);
+  border-color: var(--oranje);
 }
 .oefening-kaart:active { transform: scale(.97); }
 
-.vak-oranje .oefening-kaart:hover { border-color: var(--oranje); }
-.vak-groen  .oefening-kaart:hover { border-color: var(--groen); }
-
-.oef-emoji { font-size: 2rem; line-height: 1; }
-.oef-naam  { font-size: .9rem; font-weight: 800; color: var(--tekst); }
+.oef-emoji { font-size: 2.6rem; line-height: 1; }
+.oef-naam  { font-size: 1rem; font-weight: 800; color: var(--tekst); }
 .oef-sterren { font-size: .9rem; }
 
 .v-balk {
@@ -754,7 +754,7 @@ input  { font-family: var(--font); }
   .keuze-knop       { font-size: 1.3rem; padding: .65rem 1.2rem; }
   .taal-woord-display { font-size: 2.2rem; }
   .rsl-getal        { width: 50px; height: 46px; font-size: 1.3rem; }
-  .oefeningen-grid  { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .oefeningen-grid  { grid-template-columns: repeat(2, 1fr); }
   .klok-svg         { width: 170px; height: 170px; }
 }
 
