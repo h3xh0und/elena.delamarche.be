@@ -47,6 +47,13 @@ function voortgangBalk(array $stats): string {
 <main class="dashboard">
 
 <div class="oefeningen-grid">
+
+<a href="sneltest.php" class="oefening-kaart sneltest-kaart">
+    <div class="oef-emoji">⚡</div>
+    <div class="oef-naam">Sneltest</div>
+    <div class="oef-nieuw">2 minuten</div>
+</a>
+
 <?php foreach ($CATEGORIEEN as $vakKey => $vak): foreach ($vak['oefeningen'] as $oefeningKey => $oef):
     $stats   = $voortgang[$oefeningKey] ?? null;
     $gedaan  = $stats['gedaan']  ?? 0;

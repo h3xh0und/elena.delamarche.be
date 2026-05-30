@@ -14,7 +14,6 @@ $CATEGORIEEN = [
             'gemengd'        => ['naam' => 'Gemengd',             'emoji' => '🔄'],
             'drie_optellen'  => ['naam' => 'Drie getallen',       'emoji' => '3️⃣'],
             'splitsen'       => ['naam' => 'Splitsen',            'emoji' => '✂️'],
-            'aftrekken_brug' => ['naam' => 'Aftrekken met brug',  'emoji' => '🌉'],
             'ontbrekend'     => ['naam' => 'Ontbrekend getal',    'emoji' => '❓'],
             'wisselsom'      => ['naam' => 'Wisselsom',           'emoji' => '🔁'],
             'de_helft'       => ['naam' => 'De helft',            'emoji' => '½'],

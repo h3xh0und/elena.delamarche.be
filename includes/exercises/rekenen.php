@@ -15,7 +15,6 @@ function genereerRekenOefening(string $type, int $maxGetal = 20, string $klokNiv
         'klok'           => rKlok($klokNiveau),
         'sprongen'       => rSprongen($mx, $sprongenStap),
         'rekenslang'     => rRekenslang($mx),
-        'aftrekken_brug' => rAftrekkenBrug($mx),
         'ontbrekend'     => rOntbrekend($mx),
         'wisselsom'      => rWisselsom($mx),
         'geld'           => rGeld(),
@@ -37,6 +36,10 @@ function rOptellen(int $max = 20): array {
 }
 
 function rAftrekken(int $max): array {
+    // Als max >= 11: ook brugsommen (aftrekken over 10) meenemen
+    if ($max >= 11 && rand(0, 2) === 0) {
+        return rAftrekkenBrug($max);
+    }
     $a = rand((int)($max / 2), $max);
     $b = rand(1, $a - 1);
     return [
