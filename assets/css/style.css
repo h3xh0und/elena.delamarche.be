@@ -370,7 +370,63 @@ input  { font-family: var(--font); }
   letter-spacing: .05em;
 }
 
-.oef-extra { /* holds SVG clock or chain */ }
+.oef-extra { /* holds SVG clock, chain or pictogram */ }
+
+.lang-vraag { font-size: 1.3rem !important; }
+
+/* ── Pictogram ────────────────────────────────────────── */
+.pictogram-tabel {
+  width: 100%;
+  background: #f8fafc;
+  border-radius: var(--radius-sm);
+  padding: .85rem 1rem;
+  border: 2px solid var(--rand);
+}
+
+.pic-titel {
+  font-weight: 800;
+  font-size: .95rem;
+  margin-bottom: .65rem;
+  color: var(--tekst-zacht);
+}
+
+.pic-rij {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .35rem;
+}
+
+.pic-naam {
+  width: 4rem;
+  font-weight: 700;
+  font-size: .9rem;
+  flex-shrink: 0;
+}
+
+.pic-balk {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pic-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primair);
+}
+
+.kleur-oranje .pic-dot { background: var(--oranje); }
+.kleur-groen  .pic-dot { background: var(--groen); }
+
+.pic-getal {
+  margin-left: .3rem;
+  font-weight: 900;
+  font-size: .9rem;
+}
 
 /* ── Invoer zones ─────────────────────────────────────── */
 .invoer-zone { display: flex; flex-direction: column; gap: .75rem; }

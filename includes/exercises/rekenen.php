@@ -379,6 +379,53 @@ function rRekenslang(int $max = 20): array {
     ];
 }
 
+function rWoordsommen(int $max = 20): array {
+    $mx   = max(10, $max);
+    $soort = rand(0, 7);
+    switch ($soort) {
+        case 0: {
+            $x = rand(1, (int)($mx / 2));
+            return ['type' => 'invul', 'vraag' => "Het dubbel van $x is ?",
+                    'antwoord' => (string)($x * 2), 'invoer' => 'getal'];
+        }
+        case 1: {
+            $x = rand(1, (int)($mx / 2)) * 2;
+            return ['type' => 'invul', 'vraag' => "De helft van $x is ?",
+                    'antwoord' => (string)($x / 2), 'invoer' => 'getal'];
+        }
+        case 2: {
+            $a = rand(1, $mx - 1); $b = rand(1, $mx - $a);
+            return ['type' => 'invul', 'vraag' => "De som van $a en $b is ?",
+                    'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
+        }
+        case 3: {
+            $a = rand(2, $mx); $b = rand(1, $a - 1);
+            return ['type' => 'invul', 'vraag' => "Het verschil van $a en $b is ?",
+                    'antwoord' => (string)($a - $b), 'invoer' => 'getal'];
+        }
+        case 4: {
+            $a = rand(1, $mx - 1); $b = rand(1, $mx - $a);
+            return ['type' => 'invul', 'vraag' => "Vermeerder $a met $b, nu heb ik ?",
+                    'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
+        }
+        case 5: {
+            $a = rand(2, $mx); $b = rand(1, $a - 1);
+            return ['type' => 'invul', 'vraag' => "Verminder $a met $b, nu heb ik ?",
+                    'antwoord' => (string)($a - $b), 'invoer' => 'getal'];
+        }
+        case 6: {
+            $a = rand(2, $mx); $b = rand(1, $a - 1);
+            return ['type' => 'invul', 'vraag' => "Als ik $b wegdoe van $a heb ik ?",
+                    'antwoord' => (string)($a - $b), 'invoer' => 'getal'];
+        }
+        default: {
+            $a = rand(1, $mx - 1); $b = rand(1, $mx - $a);
+            return ['type' => 'invul', 'vraag' => "Ik neem $a en $b samen, nu heb ik ?",
+                    'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
+        }
+    }
+}
+
 /* ── SVG klok ─────────────────────────────────────────── */
 
 function klokSVG(int $uur, int $minuten = 0): string {

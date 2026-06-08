@@ -74,13 +74,18 @@ function toonOefening(data) {
 
   el.label.textContent = data.label  || '';
   el.extra.innerHTML   = '';
+  el.vraag.classList.remove('lang-vraag');
+
+  const vraagTekst = data.vraag || '';
 
   // Taal woord: grote weergave
-  if (data.type === 'keuze' && data.vraag && isNaN(data.vraag)) {
-    el.vraag.innerHTML = `<span class="taal-woord-display">${esc(data.vraag)}</span>`;
+  if (data.type === 'keuze' && vraagTekst && isNaN(vraagTekst)) {
+    el.vraag.innerHTML = `<span class="taal-woord-display">${esc(vraagTekst)}</span>`;
   } else {
-    el.vraag.textContent = data.vraag || '';
+    el.vraag.textContent = vraagTekst;
   }
+
+  if (vraagTekst.length > 40) el.vraag.classList.add('lang-vraag');
 
   switch (data.type) {
     case 'invul':      setupInvul(data);      break;
@@ -88,6 +93,7 @@ function toonOefening(data) {
     case 'ordenen':    setupOrdenen(data);    break;
     case 'klok':       setupKlok(data);       break;
     case 'rekenslang': setupRekenslang(data); break;
+    case 'pictogram':  setupPictogram(data);  break;
     default:           setupInvul(data);
   }
 
@@ -259,6 +265,27 @@ function setupRekenslang(data) {
     el.indienenKnop.disabled = el.rekenslangInput.value.trim() === '';
   });
   el.indienenKnop.disabled = true;
+}
+
+function setupPictogram(data) {
+  renderPictogram(data);
+  staat.huidigType = data.invoer === 'getal' ? 'invul' : 'keuze';
+  if (data.invoer === 'getal') setupInvul(data);
+  else setupKeuze(data);
+}
+
+function renderPictogram(data) {
+  let html = `<div class="pictogram-tabel">`;
+  html += `<div class="pic-titel">${esc(data.emoji)} ${esc(data.titel)}</div>`;
+  (data.rijen || []).forEach(rij => {
+    const dots = Array(rij.aantal).fill('<span class="pic-dot"></span>').join('');
+    html += `<div class="pic-rij">`;
+    html += `<span class="pic-naam">${esc(rij.naam)}</span>`;
+    html += `<span class="pic-balk">${dots}<strong class="pic-getal">${rij.aantal}</strong></span>`;
+    html += `</div>`;
+  });
+  html += `</div>`;
+  el.extra.innerHTML = html;
 }
 
 /* ── Antwoord indienen ─────────────────────────────────── */

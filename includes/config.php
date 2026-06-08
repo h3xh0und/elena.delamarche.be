@@ -26,4 +26,21 @@ $CATEGORIEEN = [
             'rekenslang'     => ['naam' => 'Rekenslang',          'emoji' => '🐍'],
         ],
     ],
+    'woordsommen' => [
+        'naam'  => 'Woordsommen',
+        'kleur' => 'groen',
+        'emoji' => '💬',
+        'oefeningen' => [
+            'woordsommen' => ['naam' => 'Woordsommen', 'emoji' => '💬'],
+        ],
+    ],
+    'logisch_denken' => [
+        'naam'  => 'Logisch denken',
+        'kleur' => 'oranje',
+        'emoji' => '🧠',
+        'oefeningen' => [
+            'meer_minder' => ['naam' => 'Meer en minder', 'emoji' => '🔁'],
+            'pictogram'   => ['naam' => 'Tabel lezen',    'emoji' => '📊'],
+        ],
+    ],
 ];

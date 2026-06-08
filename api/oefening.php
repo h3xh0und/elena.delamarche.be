@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/flatfile.php';
 require_once __DIR__ . '/../includes/exercises/rekenen.php';
+require_once __DIR__ . '/../includes/exercises/logisch.php';
 
 header('Content-Type: application/json');
 
@@ -31,6 +32,12 @@ if ($cat === 'sneltest') {
     $oefening = rSneltest($maxGetal);
 } elseif (in_array($cat, $rekenTypes)) {
     $oefening = genereerRekenOefening($cat, $maxGetal, $klokNiveau, $sprongenStap);
+} elseif ($cat === 'woordsommen') {
+    $oefening = rWoordsommen($maxGetal);
+} elseif ($cat === 'meer_minder') {
+    $oefening = rMeerMinder($maxGetal);
+} elseif ($cat === 'pictogram') {
+    $oefening = rPictogram();
 } else {
     http_response_code(400);
     echo json_encode(['fout' => 'Onbekende categorie']);
