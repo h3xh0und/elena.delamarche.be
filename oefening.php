@@ -61,12 +61,8 @@ $csrf     = csrfToken();
         <div id="oef-vraag" class="oef-vraag-tekst"></div>
         <div id="oef-extra" class="oef-extra"></div>
 
-        <!-- Invul (getal/tekst) -->
-        <div id="invul-zone" class="invoer-zone verborgen">
-            <input type="number" id="invul-input" class="groot-invulveld"
-                   inputmode="numeric" placeholder="?" min="0" max="100" autocomplete="off">
-            <p id="invul-hint" class="invoer-hint"></p>
-        </div>
+        <!-- Invul (getal) -->
+        <div id="invul-zone" class="invoer-zone verborgen"></div>
 
         <!-- Keuze (meerkeuze knoppen) -->
         <div id="keuze-zone" class="invoer-zone verborgen">
@@ -84,19 +80,34 @@ $csrf     = csrfToken();
         <!-- Klok -->
         <div id="klok-zone" class="invoer-zone verborgen">
             <div id="klok-svg-container"></div>
-            <input type="number" id="klok-input" class="groot-invulveld"
-                   inputmode="numeric" placeholder="uur" min="1" max="12" autocomplete="off">
-            <p class="invoer-hint">Typ het uur (1–12)</p>
         </div>
 
         <!-- Rekenslang -->
         <div id="rekenslang-zone" class="invoer-zone verborgen">
             <div id="rekenslang-keten" class="rekenslang-keten"></div>
-            <input type="number" id="rekenslang-input" class="groot-invulveld"
-                   inputmode="numeric" placeholder="?" min="0" max="20" autocomplete="off">
         </div>
 
-        <button id="indienen-knop" class="btn btn-primair btn-groot indienen-knop" disabled>
+        <!-- Numeriek toetsenblok (gedeeld voor invul / klok-uur / rekenslang) -->
+        <div id="numpad" class="numpad verborgen">
+            <div id="numpad-display" class="numpad-display leeg">?</div>
+            <p id="numpad-hint" class="invoer-hint"></p>
+            <div class="numpad-knoppen">
+                <button type="button" class="np-btn" data-n="7">7</button>
+                <button type="button" class="np-btn" data-n="8">8</button>
+                <button type="button" class="np-btn" data-n="9">9</button>
+                <button type="button" class="np-btn" data-n="4">4</button>
+                <button type="button" class="np-btn" data-n="5">5</button>
+                <button type="button" class="np-btn" data-n="6">6</button>
+                <button type="button" class="np-btn" data-n="1">1</button>
+                <button type="button" class="np-btn" data-n="2">2</button>
+                <button type="button" class="np-btn" data-n="3">3</button>
+                <button type="button" class="np-btn np-wis" id="np-wis">⌫</button>
+                <button type="button" class="np-btn" data-n="0">0</button>
+                <button type="button" class="np-btn np-ok" id="np-ok" disabled>✓</button>
+            </div>
+        </div>
+
+        <button id="indienen-knop" class="btn btn-primair btn-groot indienen-knop verborgen" disabled>
             Controleer ✓
         </button>
     </div>

@@ -69,12 +69,24 @@ $highscore = leesSneltestHighscore($kind);
 
         <div id="snel-vraag" class="oef-vraag-tekst"></div>
 
-        <input type="number" id="snel-input" class="groot-invulveld"
-               inputmode="numeric" placeholder="?" min="0" max="999" autocomplete="off">
-
-        <button id="snel-indienen" class="btn btn-primair btn-groot indienen-knop" disabled>Controleer ✓</button>
+        <div id="snel-display" class="numpad-display leeg">?</div>
 
         <div id="snel-flash" class="snel-flash verborgen"></div>
+
+        <div class="numpad-knoppen">
+            <button type="button" class="np-btn" data-sn="7">7</button>
+            <button type="button" class="np-btn" data-sn="8">8</button>
+            <button type="button" class="np-btn" data-sn="9">9</button>
+            <button type="button" class="np-btn" data-sn="4">4</button>
+            <button type="button" class="np-btn" data-sn="5">5</button>
+            <button type="button" class="np-btn" data-sn="6">6</button>
+            <button type="button" class="np-btn" data-sn="1">1</button>
+            <button type="button" class="np-btn" data-sn="2">2</button>
+            <button type="button" class="np-btn" data-sn="3">3</button>
+            <button type="button" class="np-btn np-wis" id="snel-wis">⌫</button>
+            <button type="button" class="np-btn" data-sn="0">0</button>
+            <button type="button" class="np-btn np-ok" id="snel-ok" disabled>✓</button>
+        </div>
 
     </div>
 
@@ -116,6 +128,8 @@ let scoreTotaal   = 0;
 let bezig         = false;
 let vraagHistory  = [];
 
+let snelNumVal = '';
+
 const el = {
     faseStart:   document.getElementById('fase-start'),
     faseBezig:   document.getElementById('fase-bezig'),
@@ -124,8 +138,8 @@ const el = {
     headerTimer: document.getElementById('header-timer'),
     ringProg:    document.getElementById('ring-prog'),
     vraag:       document.getElementById('snel-vraag'),
-    input:       document.getElementById('snel-input'),
-    indienen:    document.getElementById('snel-indienen'),
+    display:     document.getElementById('snel-display'),
+    ok:          document.getElementById('snel-ok'),
     flash:       document.getElementById('snel-flash'),
     correct:     document.getElementById('snel-correct'),
     totaal:      document.getElementById('snel-totaal'),
@@ -136,14 +150,37 @@ const el = {
     nieuwRecord: document.getElementById('nieuw-record'),
 };
 
+function snelAddDigit(d) {
+    if (snelNumVal.length >= 3) return;
+    snelNumVal += d;
+    snelUpdateDisplay();
+}
+function snelWis() {
+    snelNumVal = snelNumVal.slice(0, -1);
+    snelUpdateDisplay();
+}
+function snelUpdateDisplay() {
+    el.display.textContent = snelNumVal || '?';
+    el.display.classList.toggle('leeg', snelNumVal === '');
+    el.ok.disabled = snelNumVal === '';
+}
+function snelReset() {
+    snelNumVal = '';
+    snelUpdateDisplay();
+}
+
 document.getElementById('start-knop').addEventListener('click', startTest);
 document.getElementById('opnieuw-knop').addEventListener('click', () => location.reload());
-el.indienen.addEventListener('click', dienIn);
-el.input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !el.indienen.disabled) dienIn();
+el.ok.addEventListener('click', dienIn);
+document.getElementById('snel-wis').addEventListener('click', snelWis);
+document.querySelectorAll('.np-btn[data-sn]').forEach(btn => {
+    btn.addEventListener('click', () => snelAddDigit(btn.dataset.sn));
 });
-el.input.addEventListener('input', () => {
-    el.indienen.disabled = el.input.value.trim() === '';
+document.addEventListener('keydown', e => {
+    if (!bezig) return;
+    if (e.key === 'Enter' && !el.ok.disabled) { dienIn(); return; }
+    if (e.key >= '0' && e.key <= '9') { snelAddDigit(e.key); e.preventDefault(); }
+    else if (e.key === 'Backspace')    { snelWis();           e.preventDefault(); }
 });
 
 async function startTest() {
@@ -193,19 +230,17 @@ async function laadVraag() {
         vraagHistory.push(data.vraag);
         if (vraagHistory.length > 12) vraagHistory.shift();
         el.vraag.textContent = data.vraag || '';
-        el.input.value       = '';
-        el.indienen.disabled = true;
+        snelReset();
         el.flash.classList.add('verborgen');
-        el.input.focus();
     } catch (e) {}
 }
 
 async function dienIn() {
     if (!bezig || resterend <= 0) return;
-    const antwoord = el.input.value.trim();
+    const antwoord = snelNumVal;
     if (!antwoord) return;
 
-    el.indienen.disabled = true;
+    el.ok.disabled = true;
     scoreTotaal++;
 
     const fd = new FormData();

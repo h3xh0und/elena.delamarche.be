@@ -4,6 +4,7 @@
 const staat = {
   huidigType:     null,
   huidigAntwoord: null,   // selected answer (keuze/ordenen)
+  numVal:         '',     // current numeric input (numpad)
   ordenenPool:    [],     // remaining numbers for ordenen
   ordenenGekozen: [],     // chosen numbers for ordenen
   scoreCorrect:   0,
@@ -12,21 +13,19 @@ const staat = {
 
 /* ── DOM refs ──────────────────────────────────────────── */
 const el = {
-  laad:          document.getElementById('laad-indicator'),
-  kaart:         document.getElementById('oefening-kaart'),
-  label:         document.getElementById('oef-label'),
-  vraag:         document.getElementById('oef-vraag'),
-  extra:         document.getElementById('oef-extra'),
-  feedback:      document.getElementById('feedback'),
-  fbIcoon:       document.getElementById('feedback-icoon'),
-  fbBericht:     document.getElementById('feedback-bericht'),
-  scoreCorrect:  document.getElementById('score-correct'),
-  scoreTotaal:   document.getElementById('score-totaal'),
-  indienenKnop:  document.getElementById('indienen-knop'),
+  laad:           document.getElementById('laad-indicator'),
+  kaart:          document.getElementById('oefening-kaart'),
+  label:          document.getElementById('oef-label'),
+  vraag:          document.getElementById('oef-vraag'),
+  extra:          document.getElementById('oef-extra'),
+  feedback:       document.getElementById('feedback'),
+  fbIcoon:        document.getElementById('feedback-icoon'),
+  fbBericht:      document.getElementById('feedback-bericht'),
+  scoreCorrect:   document.getElementById('score-correct'),
+  scoreTotaal:    document.getElementById('score-totaal'),
+  indienenKnop:   document.getElementById('indienen-knop'),
   // zones
   invulZone:      document.getElementById('invul-zone'),
-  invulInput:     document.getElementById('invul-input'),
-  invulHint:      document.getElementById('invul-hint'),
   keuzeZone:      document.getElementById('keuze-zone'),
   keuzeKnoppen:   document.getElementById('keuze-knoppen'),
   ordenenZone:    document.getElementById('ordenen-zone'),
@@ -35,21 +34,36 @@ const el = {
   ordenenReset:   document.getElementById('ordenen-reset'),
   klokZone:       document.getElementById('klok-zone'),
   klokSvg:        document.getElementById('klok-svg-container'),
-  klokInput:      document.getElementById('klok-input'),
   rekenslangZone: document.getElementById('rekenslang-zone'),
   rekenslangKeten:document.getElementById('rekenslang-keten'),
-  rekenslangInput:document.getElementById('rekenslang-input'),
+  // numpad
+  numpad:         document.getElementById('numpad'),
+  numpadDisplay:  document.getElementById('numpad-display'),
+  numpadHint:     document.getElementById('numpad-hint'),
+  npOk:           document.getElementById('np-ok'),
 };
 
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   laadVolgendeOefening();
   el.indienenKnop.addEventListener('click', dienIn);
+  el.npOk.addEventListener('click', dienIn);
   el.ordenenReset.addEventListener('click', resetOrdenen);
 
-  // Enter key submits
+  document.getElementById('np-wis').addEventListener('click', wisDigit);
+  document.querySelectorAll('.np-btn[data-n]').forEach(btn => {
+    btn.addEventListener('click', () => addDigit(btn.dataset.n));
+  });
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !el.indienenKnop.disabled) dienIn();
+    if (e.key === 'Enter') {
+      if (!el.numpad.classList.contains('verborgen') && !el.npOk.disabled) { dienIn(); return; }
+      if (!el.indienenKnop.disabled) dienIn();
+      return;
+    }
+    if (el.numpad.classList.contains('verborgen')) return;
+    if (e.key >= '0' && e.key <= '9') { addDigit(e.key); e.preventDefault(); }
+    else if (e.key === 'Backspace')    { wisDigit();       e.preventDefault(); }
   });
 });
 
@@ -104,15 +118,8 @@ function toonOefening(data) {
 
 /* ── Setup per type ────────────────────────────────────── */
 function setupInvul(data) {
-  el.invulHint.textContent = data.hint || '';
-  el.invulInput.value      = '';
-  el.invulInput.placeholder = '?';
   toonZone('invul');
-  el.invulInput.focus();
-  el.invulInput.addEventListener('input', () => {
-    el.indienenKnop.disabled = el.invulInput.value.trim() === '';
-  }, { once: false });
-  el.indienenKnop.disabled = true;
+  toonNumpad(true, data.hint || '');
 }
 
 function setupKeuze(data) {
@@ -191,11 +198,6 @@ function setupKlok(data) {
   el.klokSvg.innerHTML = data.svg || '';
 
   if (data.klok_invoer === 'keuze') {
-    // Toon meerkeuze knoppen onder de klok
-    el.klokInput.classList.add('verborgen');
-    document.querySelector('.klok-zone-hint')?.remove();
-
-    // Hergebruik keuze-knoppen maar in de klok-zone
     let klokKeuze = document.getElementById('klok-keuze');
     if (!klokKeuze) {
       klokKeuze = document.createElement('div');
@@ -205,7 +207,6 @@ function setupKlok(data) {
     }
     klokKeuze.innerHTML = '';
     staat.huidigAntwoord = null;
-
     (data.opties || []).forEach(opt => {
       const btn = document.createElement('button');
       btn.className   = 'keuze-knop';
@@ -218,29 +219,20 @@ function setupKlok(data) {
       });
       klokKeuze.appendChild(btn);
     });
-
     toonZone('klok');
+    toonNumpad(false);
     el.indienenKnop.disabled = true;
   } else {
-    // Hele uren: gewoon getal invoeren
     const bestaandKeuze = document.getElementById('klok-keuze');
     if (bestaandKeuze) bestaandKeuze.innerHTML = '';
-    el.klokInput.classList.remove('verborgen');
-    el.klokInput.value = '';
     toonZone('klok');
-    el.klokInput.focus();
-    el.klokInput.addEventListener('input', () => {
-      el.indienenKnop.disabled = el.klokInput.value.trim() === '';
-    });
-    el.indienenKnop.disabled = true;
+    toonNumpad(true, 'Typ het uur (1–12)');
   }
 }
 
 function setupRekenslang(data) {
-  // Render chain
   el.rekenslangKeten.innerHTML = '';
 
-  // Start getal
   const startEl = document.createElement('div');
   startEl.className   = 'rsl-getal start';
   startEl.textContent = data.start;
@@ -258,13 +250,8 @@ function setupRekenslang(data) {
     el.rekenslangKeten.appendChild(naarEl);
   });
 
-  el.rekenslangInput.value = '';
   toonZone('rekenslang');
-  el.rekenslangInput.focus();
-  el.rekenslangInput.addEventListener('input', () => {
-    el.indienenKnop.disabled = el.rekenslangInput.value.trim() === '';
-  });
-  el.indienenKnop.disabled = true;
+  toonNumpad(true);
 }
 
 function setupPictogram(data) {
@@ -288,12 +275,44 @@ function renderPictogram(data) {
   el.extra.innerHTML = html;
 }
 
+/* ── Numpad ────────────────────────────────────────────── */
+function toonNumpad(zichtbaar, hint = '') {
+  el.numpad.classList.toggle('verborgen', !zichtbaar);
+  el.indienenKnop.classList.toggle('verborgen', zichtbaar);
+  if (zichtbaar) resetNumpad(hint);
+}
+
+function resetNumpad(hint = '') {
+  staat.numVal = '';
+  el.numpadHint.textContent = hint;
+  updateNumpad();
+}
+
+function updateNumpad() {
+  const val = staat.numVal;
+  el.numpadDisplay.textContent = val || '?';
+  el.numpadDisplay.classList.toggle('leeg', val === '');
+  el.npOk.disabled = val === '';
+}
+
+function addDigit(d) {
+  if (staat.numVal.length >= 3) return;
+  staat.numVal += d;
+  updateNumpad();
+}
+
+function wisDigit() {
+  staat.numVal = staat.numVal.slice(0, -1);
+  updateNumpad();
+}
+
 /* ── Antwoord indienen ─────────────────────────────────── */
 async function dienIn() {
   const antwoord = haalAntwoord();
   if (antwoord === null || antwoord === '') return;
 
   el.indienenKnop.disabled = true;
+  el.npOk.disabled = true;
 
   try {
     const fd = new FormData();
@@ -320,14 +339,11 @@ async function dienIn() {
 
 function haalAntwoord() {
   switch (staat.huidigType) {
-    case 'invul':      return el.invulInput.value.trim();
+    case 'invul':      return staat.numVal;
     case 'keuze':      return staat.huidigAntwoord;
     case 'klok':
-      // keuze of getal invoer
-      return staat.huidigAntwoord !== null
-        ? staat.huidigAntwoord
-        : el.klokInput.value.trim();
-    case 'rekenslang': return el.rekenslangInput.value.trim();
+      return staat.huidigAntwoord !== null ? staat.huidigAntwoord : staat.numVal;
+    case 'rekenslang': return staat.numVal;
     case 'ordenen':
       return staat.ordenenGekozen.map(i => staat.ordenenPool[i]).join(',');
     default:           return null;
@@ -359,6 +375,8 @@ function toonLaad(zichtbaar, tekst) {
 function verbergAlleZones() {
   [el.invulZone, el.keuzeZone, el.ordenenZone,
    el.klokZone, el.rekenslangZone].forEach(z => z.classList.add('verborgen'));
+  el.numpad.classList.add('verborgen');
+  el.indienenKnop.classList.remove('verborgen');
   el.indienenKnop.disabled = true;
 }
 

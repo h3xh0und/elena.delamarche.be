@@ -374,6 +374,69 @@ input  { font-family: var(--font); }
 
 .lang-vraag { font-size: 1.3rem !important; }
 
+/* ── Numeriek toetsenblok ─────────────────────────────── */
+.numpad-display {
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-align: center;
+  padding: .5rem 1rem;
+  border: 3px solid var(--rand);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tekst);
+  letter-spacing: .05em;
+}
+.numpad-display.leeg { color: #cbd5e1; }
+
+.kleur-oranje .numpad-display { border-color: var(--oranje-licht); }
+.kleur-groen  .numpad-display { border-color: var(--groen-licht); }
+
+.numpad-knoppen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .4rem;
+}
+
+.np-btn {
+  font-size: 1.5rem;
+  font-weight: 800;
+  padding: .8rem .25rem;
+  border-radius: var(--radius-sm);
+  background: #f1f5f9;
+  border: 2px solid var(--rand);
+  color: var(--tekst);
+  transition: transform .1s, background .1s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.np-btn:active { transform: scale(.91); background: #e2e8f0; }
+
+.np-wis {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+.np-wis:active { background: #fca5a5; }
+
+.np-ok {
+  background: var(--groen);
+  color: #fff;
+  border-color: var(--groen-dark);
+}
+.np-ok:not(:disabled):active { background: var(--groen-dark); transform: scale(.91); }
+.np-ok:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ── Pictogram ────────────────────────────────────────── */
 .pictogram-tabel {
   width: 100%;
