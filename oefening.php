@@ -57,40 +57,47 @@ $csrf     = csrfToken();
     <!-- Oefening kaart -->
     <div id="oefening-kaart" class="oefening-kaart verborgen">
 
-        <div id="oef-label" class="oef-vraag-label"></div>
-        <div id="oef-vraag" class="oef-vraag-tekst"></div>
-        <div id="oef-extra" class="oef-extra"></div>
+        <!-- Linkerkolom in landscape (altijd zichtbaar) -->
+        <div class="oef-inhoud">
+            <div id="oef-label" class="oef-vraag-label"></div>
+            <div id="oef-vraag" class="oef-vraag-tekst"></div>
+            <div id="oef-extra" class="oef-extra"></div>
 
-        <!-- Invul (getal) -->
-        <div id="invul-zone" class="invoer-zone verborgen"></div>
+            <!-- Invul (getal) -->
+            <div id="invul-zone" class="invoer-zone verborgen"></div>
 
-        <!-- Keuze (meerkeuze knoppen) -->
-        <div id="keuze-zone" class="invoer-zone verborgen">
-            <div id="keuze-knoppen" class="keuze-knoppen"></div>
+            <!-- Keuze (meerkeuze knoppen) -->
+            <div id="keuze-zone" class="invoer-zone verborgen">
+                <div id="keuze-knoppen" class="keuze-knoppen"></div>
+            </div>
+
+            <!-- Ordenen -->
+            <div id="ordenen-zone" class="invoer-zone verborgen">
+                <div id="ordenen-rij" class="ordenen-rij"></div>
+                <div class="ordenen-label">Jouw volgorde:</div>
+                <div id="ordenen-antwoord" class="ordenen-antwoord"></div>
+                <button type="button" class="btn btn-klein btn-grijs" id="ordenen-reset">↩ Opnieuw</button>
+            </div>
+
+            <!-- Klok -->
+            <div id="klok-zone" class="invoer-zone verborgen">
+                <div id="klok-svg-container"></div>
+            </div>
+
+            <!-- Rekenslang -->
+            <div id="rekenslang-zone" class="invoer-zone verborgen">
+                <div id="rekenslang-keten" class="rekenslang-keten"></div>
+            </div>
+
+            <button id="indienen-knop" class="btn btn-primair btn-groot indienen-knop verborgen" disabled>
+                Controleer ✓
+            </button>
         </div>
 
-        <!-- Ordenen -->
-        <div id="ordenen-zone" class="invoer-zone verborgen">
-            <div id="ordenen-rij" class="ordenen-rij"></div>
-            <div class="ordenen-label">Jouw volgorde:</div>
-            <div id="ordenen-antwoord" class="ordenen-antwoord"></div>
-            <button type="button" class="btn btn-klein btn-grijs" id="ordenen-reset">↩ Opnieuw</button>
-        </div>
-
-        <!-- Klok -->
-        <div id="klok-zone" class="invoer-zone verborgen">
-            <div id="klok-svg-container"></div>
-        </div>
-
-        <!-- Rekenslang -->
-        <div id="rekenslang-zone" class="invoer-zone verborgen">
-            <div id="rekenslang-keten" class="rekenslang-keten"></div>
-        </div>
-
-        <!-- Numeriek toetsenblok (gedeeld voor invul / klok-uur / rekenslang) -->
+        <!-- Rechterkolom in landscape: numpad -->
         <div id="numpad" class="numpad verborgen">
             <div id="numpad-display" class="numpad-display leeg">?</div>
-            <p id="numpad-hint" class="invoer-hint"></p>
+            <p id="numpad-hint" class="invoer-hint numpad-hint"></p>
             <div class="numpad-knoppen">
                 <button type="button" class="np-btn" data-n="7">7</button>
                 <button type="button" class="np-btn" data-n="8">8</button>
@@ -107,9 +114,6 @@ $csrf     = csrfToken();
             </div>
         </div>
 
-        <button id="indienen-knop" class="btn btn-primair btn-groot indienen-knop verborgen" disabled>
-            Controleer ✓
-        </button>
     </div>
 
     <!-- Feedback overlay -->

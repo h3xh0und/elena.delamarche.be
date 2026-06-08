@@ -51,26 +51,30 @@ $highscore = leesSneltestHighscore($kind);
     <!-- Actief -->
     <div id="fase-bezig" class="oefening-kaart verborgen">
 
-        <div class="snel-ring-wrapper">
-            <svg class="snel-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-                <circle cx="60" cy="60" r="50"
-                        fill="none" stroke="#e2e8f0" stroke-width="10"/>
-                <circle id="ring-prog" cx="60" cy="60" r="50"
-                        fill="none" stroke="#22c55e" stroke-width="10"
-                        stroke-linecap="round"
-                        stroke-dasharray="314.16" stroke-dashoffset="0"/>
-            </svg>
-            <div class="snel-ring-tijd" id="snel-timer">2:00</div>
+        <!-- Linkerkolom in landscape -->
+        <div class="snel-inhoud">
+            <div class="snel-ring-wrapper">
+                <svg class="snel-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+                    <circle cx="60" cy="60" r="50"
+                            fill="none" stroke="#e2e8f0" stroke-width="10"/>
+                    <circle id="ring-prog" cx="60" cy="60" r="50"
+                            fill="none" stroke="#22c55e" stroke-width="10"
+                            stroke-linecap="round"
+                            stroke-dasharray="314.16" stroke-dashoffset="0"/>
+                </svg>
+                <div class="snel-ring-tijd" id="snel-timer">2:00</div>
+            </div>
+
+            <div style="text-align:center;color:var(--tekst-zacht);font-weight:700;font-size:1rem">
+                <span id="snel-correct">0</span> ✓ &nbsp;·&nbsp; <span id="snel-totaal">0</span> geprobeerd
+            </div>
+
+            <div id="snel-vraag" class="oef-vraag-tekst"></div>
+
+            <div id="snel-flash" class="snel-flash verborgen"></div>
         </div>
 
-        <div style="text-align:center;color:var(--tekst-zacht);font-weight:700;font-size:1rem">
-            <span id="snel-correct">0</span> ✓ &nbsp;·&nbsp; <span id="snel-totaal">0</span> geprobeerd
-        </div>
-
-        <div id="snel-vraag" class="oef-vraag-tekst"></div>
-
-        <div id="snel-flash" class="snel-flash verborgen"></div>
-
+        <!-- Rechterkolom in landscape: numpad -->
         <div class="numpad">
             <div id="snel-display" class="numpad-display leeg">?</div>
             <div class="numpad-knoppen">
@@ -89,7 +93,7 @@ $highscore = leesSneltestHighscore($kind);
             </div>
         </div>
 
-    </div>
+    </div><!-- /fase-bezig -->
 
     <!-- Eindscherm -->
     <div id="fase-klaar" class="oefening-kaart verborgen">

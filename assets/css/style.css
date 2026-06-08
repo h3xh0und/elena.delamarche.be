@@ -977,6 +977,47 @@ input  { font-family: var(--font); }
 @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.06); } }
 
 
+/* ── Landscape: twee kolommen ────────────────────────── */
+
+/* Basisstijl wrappers (portret én landscape) */
+.oef-inhoud {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.snel-inhoud {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+}
+
+@media (orientation: landscape) {
+  /* Minder padding rond de kaart */
+  .oefening-main   { padding: .5rem .75rem .75rem; }
+  .oefening-kaart  { padding: 1rem 1.25rem; flex-direction: row; align-items: center; gap: 1rem; }
+
+  /* Inhoud links, numpad rechts */
+  .oef-inhoud  { gap: .75rem; align-items: flex-start; }
+  .snel-inhoud { gap: .5rem; }
+
+  /* Numpad vaste breedte rechts, niet gecentreerd */
+  .numpad      { max-width: 220px; width: 220px; flex-shrink: 0; margin: 0; }
+
+  /* Kleinere ring in sneltest landscape */
+  .snel-ring-wrapper { width: 80px; height: 80px; margin-bottom: 0; }
+  .snel-ring         { width: 80px !important; height: 80px !important; }
+  .snel-ring-tijd    { font-size: 1.15rem; }
+
+  /* Vraag tekst iets kleiner zodat alles past */
+  .oef-vraag-tekst   { font-size: 1.65rem; }
+}
+
 /* ── Responsive tweaks ────────────────────────────────── */
 @media (max-width: 480px) {
   .oef-vraag-tekst  { font-size: 1.6rem; }
