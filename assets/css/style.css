@@ -375,6 +375,17 @@ input  { font-family: var(--font); }
 .lang-vraag { font-size: 1.3rem !important; }
 
 /* ── Numeriek toetsenblok ─────────────────────────────── */
+.numpad {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  max-width: 340px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.numpad-hint:empty { display: none; }
+
 .numpad-display {
   font-size: 2.5rem;
   font-weight: 900;
@@ -383,7 +394,7 @@ input  { font-family: var(--font); }
   border: 3px solid var(--rand);
   border-radius: var(--radius-sm);
   background: #fff;
-  min-height: 68px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -392,49 +403,60 @@ input  { font-family: var(--font); }
 }
 .numpad-display.leeg { color: #cbd5e1; }
 
-.kleur-oranje .numpad-display { border-color: var(--oranje-licht); }
-.kleur-groen  .numpad-display { border-color: var(--groen-licht); }
-
 .numpad-knoppen {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: .4rem;
+  gap: .55rem;
 }
 
 .np-btn {
-  font-size: 1.5rem;
-  font-weight: 800;
-  padding: .8rem .25rem;
-  border-radius: var(--radius-sm);
+  aspect-ratio: 1;
+  font-size: 1.9rem;
+  font-weight: 900;
+  border-radius: 16px;
   background: #f1f5f9;
-  border: 2px solid var(--rand);
+  border: 2px solid #dde3eb;
   color: var(--tekst);
-  transition: transform .1s, background .1s;
+  box-shadow: 0 3px 0 #c8d0dc;
+  transition: transform .1s, box-shadow .1s, background .1s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.np-btn:active { transform: scale(.91); background: #e2e8f0; }
+.np-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c8d0dc;
+  background: #e8edf3;
+}
 
 .np-wis {
-  background: #fee2e2;
+  background: #fff0f0;
   color: #dc2626;
   border-color: #fca5a5;
+  box-shadow: 0 3px 0 #f87171;
 }
-.np-wis:active { background: #fca5a5; }
+.np-wis:active { background: #fee2e2; box-shadow: 0 1px 0 #f87171; }
 
 .np-ok {
-  background: var(--groen);
+  background: #22c55e;
   color: #fff;
-  border-color: var(--groen-dark);
+  border-color: #16a34a;
+  box-shadow: 0 3px 0 #15803d;
 }
-.np-ok:not(:disabled):active { background: var(--groen-dark); transform: scale(.91); }
+.np-ok:not(:disabled):active {
+  background: #16a34a;
+  box-shadow: 0 1px 0 #15803d;
+  transform: translateY(2px);
+}
 .np-ok:disabled {
   background: #e2e8f0;
   color: #94a3b8;
   border-color: #e2e8f0;
+  box-shadow: 0 3px 0 #cbd5e1;
   cursor: not-allowed;
-  transform: none;
 }
 
 /* ── Pictogram ────────────────────────────────────────── */

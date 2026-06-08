@@ -69,23 +69,24 @@ $highscore = leesSneltestHighscore($kind);
 
         <div id="snel-vraag" class="oef-vraag-tekst"></div>
 
-        <div id="snel-display" class="numpad-display leeg">?</div>
-
         <div id="snel-flash" class="snel-flash verborgen"></div>
 
-        <div class="numpad-knoppen">
-            <button type="button" class="np-btn" data-sn="7">7</button>
-            <button type="button" class="np-btn" data-sn="8">8</button>
-            <button type="button" class="np-btn" data-sn="9">9</button>
-            <button type="button" class="np-btn" data-sn="4">4</button>
-            <button type="button" class="np-btn" data-sn="5">5</button>
-            <button type="button" class="np-btn" data-sn="6">6</button>
-            <button type="button" class="np-btn" data-sn="1">1</button>
-            <button type="button" class="np-btn" data-sn="2">2</button>
-            <button type="button" class="np-btn" data-sn="3">3</button>
-            <button type="button" class="np-btn np-wis" id="snel-wis">⌫</button>
-            <button type="button" class="np-btn" data-sn="0">0</button>
-            <button type="button" class="np-btn np-ok" id="snel-ok" disabled>✓</button>
+        <div class="numpad">
+            <div id="snel-display" class="numpad-display leeg">?</div>
+            <div class="numpad-knoppen">
+                <button type="button" class="np-btn" data-n="7">7</button>
+                <button type="button" class="np-btn" data-n="8">8</button>
+                <button type="button" class="np-btn" data-n="9">9</button>
+                <button type="button" class="np-btn" data-n="4">4</button>
+                <button type="button" class="np-btn" data-n="5">5</button>
+                <button type="button" class="np-btn" data-n="6">6</button>
+                <button type="button" class="np-btn" data-n="1">1</button>
+                <button type="button" class="np-btn" data-n="2">2</button>
+                <button type="button" class="np-btn" data-n="3">3</button>
+                <button type="button" class="np-btn np-wis" id="snel-wis">⌫</button>
+                <button type="button" class="np-btn" data-n="0">0</button>
+                <button type="button" class="np-btn np-ok" id="snel-ok" disabled>✓</button>
+            </div>
         </div>
 
     </div>
@@ -173,8 +174,8 @@ document.getElementById('start-knop').addEventListener('click', startTest);
 document.getElementById('opnieuw-knop').addEventListener('click', () => location.reload());
 el.ok.addEventListener('click', dienIn);
 document.getElementById('snel-wis').addEventListener('click', snelWis);
-document.querySelectorAll('.np-btn[data-sn]').forEach(btn => {
-    btn.addEventListener('click', () => snelAddDigit(btn.dataset.sn));
+document.querySelectorAll('.np-btn[data-n]').forEach(btn => {
+    btn.addEventListener('click', () => snelAddDigit(btn.dataset.n));
 });
 document.addEventListener('keydown', e => {
     if (!bezig) return;
