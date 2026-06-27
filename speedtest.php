@@ -2,11 +2,11 @@
 require_once 'includes/auth.php';
 require_once 'includes/flatfile.php';
 
-vereisInlog();
+requireLogin();
 
-$kind      = huidigKind();
+$user      = currentUser();
 $csrf      = csrfToken();
-$highscore = leesSneltestHighscore($kind);
+$highscore = readSpeedtestHighscore($user);
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -14,8 +14,7 @@ $highscore = leesSneltestHighscore($kind);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sneltest – Oefenwebsite</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="oefening-pagina kleur-oranje">
@@ -51,7 +50,6 @@ $highscore = leesSneltestHighscore($kind);
     <!-- Actief -->
     <div id="fase-bezig" class="oefening-kaart verborgen">
 
-        <!-- Linkerkolom in landscape -->
         <div class="snel-inhoud">
             <div class="snel-ring-wrapper">
                 <svg class="snel-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
@@ -74,7 +72,7 @@ $highscore = leesSneltestHighscore($kind);
             <div id="snel-flash" class="snel-flash verborgen"></div>
         </div>
 
-        <!-- Rechterkolom in landscape: numpad -->
+        <!-- Numpad -->
         <div class="numpad">
             <div id="snel-display" class="numpad-display leeg">?</div>
             <div class="numpad-knoppen">
@@ -123,134 +121,134 @@ $highscore = leesSneltestHighscore($kind);
 
 <script>
 const CSRF        = <?= json_encode($csrf) ?>;
-const DUUR        = 120;
+const DURATION    = 120;
 const CIRCUMFERENCE = 2 * Math.PI * 50;
 
 let timerInterval = null;
-let resterend     = DUUR;
+let remaining     = DURATION;
 let scoreCorrect  = 0;
-let scoreTotaal   = 0;
-let bezig         = false;
-let vraagHistory  = [];
+let scoreTotal    = 0;
+let running       = false;
+let questionHistory = [];
 
-let snelNumVal = '';
+let numVal = '';
 
 const el = {
-    faseStart:   document.getElementById('fase-start'),
-    faseBezig:   document.getElementById('fase-bezig'),
-    faseKlaar:   document.getElementById('fase-klaar'),
+    phaseStart:  document.getElementById('fase-start'),
+    phaseRunning: document.getElementById('fase-bezig'),
+    phaseDone:   document.getElementById('fase-klaar'),
     timer:       document.getElementById('snel-timer'),
     headerTimer: document.getElementById('header-timer'),
     ringProg:    document.getElementById('ring-prog'),
-    vraag:       document.getElementById('snel-vraag'),
+    question:    document.getElementById('snel-vraag'),
     display:     document.getElementById('snel-display'),
     ok:          document.getElementById('snel-ok'),
     flash:       document.getElementById('snel-flash'),
     correct:     document.getElementById('snel-correct'),
-    totaal:      document.getElementById('snel-totaal'),
-    eindCorrect: document.getElementById('eind-correct'),
-    eindTotaal:  document.getElementById('eind-totaal'),
-    eindPct:     document.getElementById('eind-pct'),
-    eindEmoji:   document.getElementById('eind-emoji'),
-    nieuwRecord: document.getElementById('nieuw-record'),
+    total:       document.getElementById('snel-totaal'),
+    endCorrect:  document.getElementById('eind-correct'),
+    endTotal:    document.getElementById('eind-totaal'),
+    endPct:      document.getElementById('eind-pct'),
+    endEmoji:    document.getElementById('eind-emoji'),
+    newRecord:   document.getElementById('nieuw-record'),
 };
 
-function snelAddDigit(d) {
-    if (snelNumVal.length >= 3) return;
-    snelNumVal += d;
-    snelUpdateDisplay();
+function addDigit(d) {
+    if (numVal.length >= 3) return;
+    numVal += d;
+    updateDisplay();
 }
-function snelWis() {
-    snelNumVal = snelNumVal.slice(0, -1);
-    snelUpdateDisplay();
+function deleteDigit() {
+    numVal = numVal.slice(0, -1);
+    updateDisplay();
 }
-function snelUpdateDisplay() {
-    el.display.textContent = snelNumVal || '?';
-    el.display.classList.toggle('leeg', snelNumVal === '');
-    el.ok.disabled = snelNumVal === '';
+function updateDisplay() {
+    el.display.textContent = numVal || '?';
+    el.display.classList.toggle('leeg', numVal === '');
+    el.ok.disabled = numVal === '';
 }
-function snelReset() {
-    snelNumVal = '';
-    snelUpdateDisplay();
+function resetInput() {
+    numVal = '';
+    updateDisplay();
 }
 
 document.getElementById('start-knop').addEventListener('click', startTest);
 document.getElementById('opnieuw-knop').addEventListener('click', () => location.reload());
-el.ok.addEventListener('click', dienIn);
-document.getElementById('snel-wis').addEventListener('click', snelWis);
+el.ok.addEventListener('click', submit);
+document.getElementById('snel-wis').addEventListener('click', deleteDigit);
 document.querySelectorAll('.np-btn[data-n]').forEach(btn => {
-    btn.addEventListener('click', () => snelAddDigit(btn.dataset.n));
+    btn.addEventListener('click', () => addDigit(btn.dataset.n));
 });
 document.addEventListener('keydown', e => {
-    if (!bezig) return;
-    if (e.key === 'Enter' && !el.ok.disabled) { dienIn(); return; }
-    if (e.key >= '0' && e.key <= '9') { snelAddDigit(e.key); e.preventDefault(); }
-    else if (e.key === 'Backspace')    { snelWis();           e.preventDefault(); }
+    if (!running) return;
+    if (e.key === 'Enter' && !el.ok.disabled) { submit(); return; }
+    if (e.key >= '0' && e.key <= '9') { addDigit(e.key); e.preventDefault(); }
+    else if (e.key === 'Backspace')    { deleteDigit();   e.preventDefault(); }
 });
 
 async function startTest() {
-    resterend    = DUUR;
+    remaining    = DURATION;
     scoreCorrect = 0;
-    scoreTotaal  = 0;
-    bezig        = true;
-    vraagHistory = [];
+    scoreTotal   = 0;
+    running      = true;
+    questionHistory = [];
 
-    el.faseStart.classList.add('verborgen');
-    el.faseBezig.classList.remove('verborgen');
+    el.phaseStart.classList.add('verborgen');
+    el.phaseRunning.classList.remove('verborgen');
 
     updateTimer();
     timerInterval = setInterval(() => {
-        resterend--;
+        remaining--;
         updateTimer();
-        if (resterend <= 0) eindTest();
+        if (remaining <= 0) endTest();
     }, 1000);
 
-    await laadVraag();
+    await loadQuestion();
 }
 
 function updateTimer() {
-    const min = Math.floor(resterend / 60);
-    const sec = resterend % 60;
+    const min = Math.floor(remaining / 60);
+    const sec = remaining % 60;
     const txt = `${min}:${sec.toString().padStart(2, '0')}`;
     el.timer.textContent       = txt;
     el.headerTimer.textContent = txt;
 
-    const pct = resterend / DUUR;
+    const pct = remaining / DURATION;
     el.ringProg.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
-    el.ringProg.style.stroke = resterend > 60 ? '#22c55e'
-                             : resterend > 20 ? '#f97316'
+    el.ringProg.style.stroke = remaining > 60 ? '#22c55e'
+                             : remaining > 20 ? '#f97316'
                              : '#ef4444';
 }
 
-async function laadVraag() {
-    if (!bezig) return;
+async function loadQuestion() {
+    if (!running) return;
     try {
-        let data, pogingen = 0;
+        let data, attempts = 0;
         do {
-            const res = await fetch('api/oefening.php?cat=sneltest');
+            const res = await fetch('api/exercise.php?cat=speedtest');
             data = await res.json();
-            pogingen++;
-        } while (vraagHistory.includes(data.vraag) && pogingen < 6);
+            attempts++;
+        } while (questionHistory.includes(data.vraag) && attempts < 6);
 
-        vraagHistory.push(data.vraag);
-        if (vraagHistory.length > 12) vraagHistory.shift();
-        el.vraag.textContent = data.vraag || '';
-        snelReset();
+        questionHistory.push(data.vraag);
+        if (questionHistory.length > 12) questionHistory.shift();
+        el.question.textContent = data.vraag || '';
+        resetInput();
         el.flash.classList.add('verborgen');
     } catch (e) {}
 }
 
-async function dienIn() {
-    if (!bezig || resterend <= 0) return;
-    const antwoord = snelNumVal;
-    if (!antwoord) return;
+async function submit() {
+    if (!running || remaining <= 0) return;
+    const answer = numVal;
+    if (!answer) return;
 
     el.ok.disabled = true;
-    scoreTotaal++;
+    scoreTotal++;
 
     const fd = new FormData();
-    fd.append('antwoord', antwoord);
-    const res  = await fetch('api/antwoord.php', {
+    fd.append('antwoord', answer);
+    const res  = await fetch('api/answer.php', {
         method: 'POST',
         headers: { 'X-CSRF-Token': CSRF },
         body: fd,
@@ -259,37 +257,37 @@ async function dienIn() {
 
     if (data.correct) scoreCorrect++;
     el.correct.textContent = scoreCorrect;
-    el.totaal.textContent  = scoreTotaal;
+    el.total.textContent   = scoreTotal;
 
     el.flash.textContent = data.correct ? '✓' : `✗  ${data.correct_antwoord}`;
     el.flash.className   = 'snel-flash ' + (data.correct ? 'flash-goed' : 'flash-fout');
 
-    setTimeout(laadVraag, data.correct ? 250 : 700);
+    setTimeout(loadQuestion, data.correct ? 250 : 700);
 }
 
-function eindTest() {
-    bezig = false;
+function endTest() {
+    running = false;
     clearInterval(timerInterval);
 
-    el.faseBezig.classList.add('verborgen');
-    el.faseKlaar.classList.remove('verborgen');
+    el.phaseRunning.classList.add('verborgen');
+    el.phaseDone.classList.remove('verborgen');
 
-    el.eindCorrect.textContent = scoreCorrect;
-    el.eindTotaal.textContent  = scoreTotaal;
+    el.endCorrect.textContent = scoreCorrect;
+    el.endTotal.textContent   = scoreTotal;
 
-    const pct = scoreTotaal > 0 ? Math.round(scoreCorrect / scoreTotaal * 100) : 0;
-    el.eindPct.textContent = pct + '% correct';
+    const pct = scoreTotal > 0 ? Math.round(scoreCorrect / scoreTotal * 100) : 0;
+    el.endPct.textContent = pct + '% correct';
 
-    if      (pct >= 90) el.eindEmoji.textContent = '🏆';
-    else if (pct >= 70) el.eindEmoji.textContent = '⭐';
-    else                el.eindEmoji.textContent = '💪';
+    if      (pct >= 90) el.endEmoji.textContent = '🏆';
+    else if (pct >= 70) el.endEmoji.textContent = '⭐';
+    else                el.endEmoji.textContent = '💪';
 
     const fd = new FormData();
-    fd.append('actie', 'sneltest_score');
+    fd.append('action', 'speedtest_score');
     fd.append('score', scoreCorrect);
-    fetch('api/instellingen.php', { method: 'POST', headers: { 'X-CSRF-Token': CSRF }, body: fd })
+    fetch('api/settings.php', { method: 'POST', headers: { 'X-CSRF-Token': CSRF }, body: fd })
         .then(r => r.json())
-        .then(data => { if (data.nieuw_record) el.nieuwRecord.classList.remove('verborgen'); });
+        .then(data => { if (data.new_record) el.newRecord.classList.remove('verborgen'); });
 }
 </script>
 

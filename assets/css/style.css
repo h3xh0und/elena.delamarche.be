@@ -1034,3 +1034,17 @@ input  { font-family: var(--font); }
   .oefening-kaart { padding: 2.5rem 2rem 2.25rem; }
   .oef-vraag-tekst { font-size: 2.4rem; }
 }
+
+/* ── Footer ─────────────────────────────────────────────── */
+.site-footer {
+  text-align: center;
+  padding: 1.5rem 1rem 2rem;
+  font-size: .8rem;
+  color: var(--tekst-zacht);
+}
+.site-footer a {
+  color: var(--tekst-zacht);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.site-footer a:hover { color: var(--primair); }

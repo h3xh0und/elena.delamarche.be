@@ -2,11 +2,15 @@ Options -Indexes
 RewriteEngine On
 
 # Protect sensitive directories from direct web access
-RewriteRule ^(includes|data|original_exercises)(/|$) - [F,L]
+RewriteRule ^(includes|data|original_exercises|\.claude)(/|$) - [F,L]
 
 # Security headers
 <IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set Referrer-Policy "same-origin"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "same-origin"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none';"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>

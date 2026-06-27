@@ -5,34 +5,35 @@ if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
+        'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
     session_start();
 }
 
-function isIngelogd(): bool {
-    return !empty($_SESSION['kind']);
+function isLoggedIn(): bool {
+    return !empty($_SESSION['user']);
 }
 
-function vereisInlog(): void {
-    if (!isIngelogd()) {
+function requireLogin(): void {
+    if (!isLoggedIn()) {
         $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
         header('Location: ' . $base . '/index.php');
         exit;
     }
 }
 
-function huidigKind(): string {
-    return $_SESSION['kind'] ?? '';
+function currentUser(): string {
+    return $_SESSION['user'] ?? '';
 }
 
-function inloggen(string $naam): void {
+function login(string $name): void {
     session_regenerate_id(true);
-    $_SESSION['kind'] = $naam;
+    $_SESSION['user'] = $name;
 }
 
-function uitloggen(): void {
+function logout(): void {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $p = session_get_cookie_params();

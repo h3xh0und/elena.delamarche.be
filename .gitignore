@@ -1,4 +1,8 @@
 data/users/
 data/progress/
+data/ratelimit/
 original_exercises/
 setup.php
+migrate.php
+toetsen/
+.claude/

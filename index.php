@@ -2,71 +2,71 @@
 require_once 'includes/auth.php';
 require_once 'includes/flatfile.php';
 
-if (isIngelogd()) {
+if (isLoggedIn()) {
     header('Location: dashboard.php');
     exit;
 }
 
-$stap   = 1;
-$naam   = '';
-$bestaat = false;
-$fout   = '';
+$step   = 1;
+$name   = '';
+$exists = false;
+$error  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitize name: only letters, spaces, hyphens
-    $ruwNaam = $_POST['naam'] ?? '';
-    $naam    = mb_substr(trim(preg_replace('/[^\p{L}\s\-]/u', '', $ruwNaam)), 0, 30);
+    $rawName = $_POST['name'] ?? '';
+    $name    = mb_substr(trim(preg_replace('/[^\p{L}\s\-]/u', '', $rawName)), 0, 30);
 
-    if (mb_strlen($naam) < 2) {
-        $fout = 'Vul je naam in (minstens 2 letters).';
-        $stap = 1;
-    } elseif (!empty($_POST['stap2'])) {
-        // Stap 2: pincode verwerken
-        $bestaat = gebruikerBestaat($naam);
-        $pin  = $_POST['pin']  ?? '';
-        $pin2 = $_POST['pin2'] ?? '';
+    if (mb_strlen($name) < 2) {
+        $error = 'Vul je naam in (minstens 2 letters).';
+        $step  = 1;
+    } elseif (!empty($_POST['step2'])) {
+        $exists = userExists($name);
+        $pin    = $_POST['pin']  ?? '';
+        $pin2   = $_POST['pin2'] ?? '';
 
-        if ($bestaat) {
-            // Login flow
+        if ($exists) {
             if (!preg_match('/^\d{4}$/', $pin)) {
-                $fout = 'Vul je 4-cijferige pincode in.';
-                $stap = 2;
-            } elseif (!controleerPin($naam, $pin)) {
-                $fout = 'Verkeerde pincode. Probeer het opnieuw.';
-                $stap = 2;
+                $error = 'Vul je 4-cijferige pincode in.';
+                $step  = 2;
+            } elseif (!checkRateLimit($name)) {
+                $error = 'Te veel mislukte pogingen. Wacht 5 minuten en probeer opnieuw.';
+                $step  = 2;
+            } elseif (!verifyPin($name, $pin)) {
+                registerFailedAttempt($name);
+                $error = 'Verkeerde pincode. Probeer het opnieuw.';
+                $step  = 2;
             } else {
-                inloggen($naam);
+                resetRateLimit($name);
+                login($name);
                 header('Location: dashboard.php');
                 exit;
             }
         } else {
-            // Register flow
             if (!preg_match('/^\d{4}$/', $pin)) {
-                $fout = 'Kies een pincode van precies 4 cijfers.';
-                $stap = 2;
+                $error = 'Kies een pincode van precies 4 cijfers.';
+                $step  = 2;
             } elseif ($pin !== $pin2) {
-                $fout = 'De twee pincodes zijn niet gelijk. Probeer opnieuw.';
-                $stap = 2;
+                $error = 'De twee pincodes zijn niet gelijk. Probeer opnieuw.';
+                $step  = 2;
             } else {
-                if (registreer($naam, $pin)) {
-                    inloggen($naam);
+                if (register($name, $pin)) {
+                    login($name);
                     header('Location: dashboard.php');
                     exit;
                 } else {
-                    $fout = 'De naam "' . htmlspecialchars($naam) . '" is al bezet. Kies een andere naam.';
-                    $stap = 1;
-                    $naam = '';
+                    $error = 'De naam "' . htmlspecialchars($name) . '" is al bezet. Kies een andere naam.';
+                    $step  = 1;
+                    $name  = '';
                 }
             }
         }
     } else {
-        // Stap 1 → 2
-        $bestaat = gebruikerBestaat($naam);
-        $stap    = 2;
+        $exists = userExists($name);
+        $step   = 2;
     }
 }
 
-$naamHtml = htmlspecialchars($naam);
+$nameHtml = htmlspecialchars($name);
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -74,8 +74,7 @@ $naamHtml = htmlspecialchars($naam);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Oefenwebsite 1ste leerjaar</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="auth-pagina">
@@ -87,35 +86,33 @@ $naamHtml = htmlspecialchars($naam);
         <p class="logo-sub">1ste leerjaar</p>
     </div>
 
-    <?php if ($fout): ?>
-    <div class="fout-bericht"><?= htmlspecialchars($fout) ?></div>
+    <?php if ($error): ?>
+    <div class="fout-bericht"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <?php if ($stap === 1): ?>
-    <!-- Stap 1: naam ingeven -->
+    <?php if ($step === 1): ?>
     <form method="POST" class="auth-form" autocomplete="off">
-        <label for="naam">Wat is jouw naam?</label>
-        <input type="text" id="naam" name="naam" value="<?= $naamHtml ?>"
+        <label for="name">Wat is jouw naam?</label>
+        <input type="text" id="name" name="name" value="<?= $nameHtml ?>"
                placeholder="Typ hier je naam" maxlength="30" required autofocus
                inputmode="text" autocapitalize="words">
         <button type="submit" class="btn btn-primair btn-groot">Verder →</button>
     </form>
 
-    <?php elseif ($stap === 2): ?>
-    <!-- Stap 2: pincode -->
+    <?php elseif ($step === 2): ?>
     <form method="POST" class="auth-form" autocomplete="off">
-        <input type="hidden" name="naam" value="<?= $naamHtml ?>">
-        <input type="hidden" name="stap2" value="1">
+        <input type="hidden" name="name" value="<?= $nameHtml ?>">
+        <input type="hidden" name="step2" value="1">
 
-        <?php if ($bestaat): ?>
-        <p class="welkom-terug">Welkom terug, <strong><?= $naamHtml ?></strong>! 👋</p>
+        <?php if ($exists): ?>
+        <p class="welkom-terug">Welkom terug, <strong><?= $nameHtml ?></strong>! 👋</p>
         <label for="pin">Jouw pincode (4 cijfers):</label>
         <input type="password" id="pin" name="pin" maxlength="4" pattern="\d{4}"
                inputmode="numeric" placeholder="••••" required autofocus>
         <button type="submit" class="btn btn-primair btn-groot">Inloggen</button>
 
         <?php else: ?>
-        <p class="welkom-nieuw">Hallo <strong><?= $naamHtml ?></strong>! Kies een pincode 🎉</p>
+        <p class="welkom-nieuw">Hallo <strong><?= $nameHtml ?></strong>! Kies een pincode 🎉</p>
         <label for="pin">Kies een pincode (4 cijfers):</label>
         <input type="password" id="pin" name="pin" maxlength="4" pattern="\d{4}"
                inputmode="numeric" placeholder="••••" required autofocus>
@@ -129,6 +126,12 @@ $naamHtml = htmlspecialchars($naam);
     </form>
     <?php endif; ?>
 </div>
+
+<footer class="site-footer">
+    <a href="privacy.php">Privacyverklaring</a>
+    ·
+    <a href="https://github.com/h3xh0und/elena.delamarche.be" target="_blank" rel="noopener noreferrer">Open source op GitHub ↗</a>
+</footer>
 
 </body>
 </html>

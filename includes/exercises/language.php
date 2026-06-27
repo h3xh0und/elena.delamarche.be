@@ -72,7 +72,7 @@ const WOORDEN = [
     ['elastiek', 3, 'iek',  'e'], ['spaghetti',3, 'i',    's'],
 ];
 
-function genereerTaalOefening(string $type): array {
+function generateLanguageExercise(string $type): array {
     return match ($type) {
         'rijmwoorden'    => tRijmwoorden(),
         'lettergrepen'   => tLettergrepen(),
@@ -138,7 +138,7 @@ function tLettergrepen(): array {
 
 /* ── Hoort er niet bij ────────────────────────────────── */
 
-const WOORDCATEGORIEEN = [
+const WORD_CATEGORIES = [
     'dieren'     => ['kat','hond','vis','vogel','konijn','koe','paard','muis','beer',
                      'aap','olifant','tijger','kikker','vlinder','leeuw','geit','eend'],
     'fruit'      => ['appel','peer','banaan','druif','aardbei','kers','pruim',
@@ -158,7 +158,7 @@ const WOORDCATEGORIEEN = [
 ];
 
 function tHoortNietBij(): array {
-    $cats = WOORDCATEGORIEEN;
+    $cats = WORD_CATEGORIES;
     $catSleutels = array_keys($cats);
 
     // Kies een hoofdcategorie

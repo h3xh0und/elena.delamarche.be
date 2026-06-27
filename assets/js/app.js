@@ -1,41 +1,41 @@
 'use strict';
 
 /* ── State ─────────────────────────────────────────────── */
-const staat = {
-  huidigType:     null,
-  huidigAntwoord: null,   // selected answer (keuze/ordenen)
+const state = {
+  currentType:    null,
+  currentAnswer:  null,   // selected answer (choice/ordering)
   numVal:         '',     // current numeric input (numpad)
-  ordenenPool:    [],     // remaining numbers for ordenen
-  ordenenGekozen: [],     // chosen numbers for ordenen
+  orderingPool:   [],     // remaining numbers for ordering
+  orderingChosen: [],     // chosen numbers for ordering
   scoreCorrect:   0,
-  scoreTotaal:    0,
+  scoreTotal:     0,
 };
 
 /* ── DOM refs ──────────────────────────────────────────── */
 const el = {
-  laad:           document.getElementById('laad-indicator'),
-  kaart:          document.getElementById('oefening-kaart'),
+  loading:        document.getElementById('laad-indicator'),
+  card:           document.getElementById('oefening-kaart'),
   label:          document.getElementById('oef-label'),
-  vraag:          document.getElementById('oef-vraag'),
+  question:       document.getElementById('oef-vraag'),
   extra:          document.getElementById('oef-extra'),
   feedback:       document.getElementById('feedback'),
-  fbIcoon:        document.getElementById('feedback-icoon'),
-  fbBericht:      document.getElementById('feedback-bericht'),
+  fbIcon:         document.getElementById('feedback-icoon'),
+  fbMessage:      document.getElementById('feedback-bericht'),
   scoreCorrect:   document.getElementById('score-correct'),
-  scoreTotaal:    document.getElementById('score-totaal'),
-  indienenKnop:   document.getElementById('indienen-knop'),
+  scoreTotal:     document.getElementById('score-totaal'),
+  submitBtn:      document.getElementById('indienen-knop'),
   // zones
-  invulZone:      document.getElementById('invul-zone'),
-  keuzeZone:      document.getElementById('keuze-zone'),
-  keuzeKnoppen:   document.getElementById('keuze-knoppen'),
-  ordenenZone:    document.getElementById('ordenen-zone'),
-  ordenenRij:     document.getElementById('ordenen-rij'),
-  ordenenAntw:    document.getElementById('ordenen-antwoord'),
-  ordenenReset:   document.getElementById('ordenen-reset'),
-  klokZone:       document.getElementById('klok-zone'),
-  klokSvg:        document.getElementById('klok-svg-container'),
-  rekenslangZone: document.getElementById('rekenslang-zone'),
-  rekenslangKeten:document.getElementById('rekenslang-keten'),
+  fillZone:       document.getElementById('invul-zone'),
+  choiceZone:     document.getElementById('keuze-zone'),
+  choiceButtons:  document.getElementById('keuze-knoppen'),
+  orderingZone:   document.getElementById('ordenen-zone'),
+  orderingRow:    document.getElementById('ordenen-rij'),
+  orderingAnswer: document.getElementById('ordenen-antwoord'),
+  orderingReset:  document.getElementById('ordenen-reset'),
+  clockZone:      document.getElementById('klok-zone'),
+  clockSvg:       document.getElementById('klok-svg-container'),
+  numberSnakeZone: document.getElementById('rekenslang-zone'),
+  numberSnakeChain: document.getElementById('rekenslang-keten'),
   // numpad
   numpad:         document.getElementById('numpad'),
   numpadDisplay:  document.getElementById('numpad-display'),
@@ -45,86 +45,85 @@ const el = {
 
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  laadVolgendeOefening();
-  el.indienenKnop.addEventListener('click', dienIn);
-  el.npOk.addEventListener('click', dienIn);
-  el.ordenenReset.addEventListener('click', resetOrdenen);
+  loadNextExercise();
+  el.submitBtn.addEventListener('click', submit);
+  el.npOk.addEventListener('click', submit);
+  el.orderingReset.addEventListener('click', resetOrdering);
 
-  document.getElementById('np-wis').addEventListener('click', wisDigit);
+  document.getElementById('np-wis').addEventListener('click', deleteDigit);
   document.querySelectorAll('.np-btn[data-n]').forEach(btn => {
     btn.addEventListener('click', () => addDigit(btn.dataset.n));
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      if (!el.numpad.classList.contains('verborgen') && !el.npOk.disabled) { dienIn(); return; }
-      if (!el.indienenKnop.disabled) dienIn();
+      if (!el.numpad.classList.contains('verborgen') && !el.npOk.disabled) { submit(); return; }
+      if (!el.submitBtn.disabled) submit();
       return;
     }
     if (el.numpad.classList.contains('verborgen')) return;
     if (e.key >= '0' && e.key <= '9') { addDigit(e.key); e.preventDefault(); }
-    else if (e.key === 'Backspace')    { wisDigit();       e.preventDefault(); }
+    else if (e.key === 'Backspace')    { deleteDigit();    e.preventDefault(); }
   });
 });
 
-/* ── Oefening laden ────────────────────────────────────── */
-async function laadVolgendeOefening() {
-  toonLaad(true);
-  verbergAlleZones();
+/* ── Load exercise ─────────────────────────────────────── */
+async function loadNextExercise() {
+  showLoading(true);
+  hideAllZones();
 
   try {
-    const res  = await fetch(`api/oefening.php?cat=${encodeURIComponent(CATEGORIE)}`);
+    const res  = await fetch(`api/exercise.php?cat=${encodeURIComponent(CATEGORIE)}`);
     const data = await res.json();
-    if (data.fout) { toonLaad(true, data.fout); return; }
-    toonOefening(data);
+    if (data.fout) { showLoading(true, data.fout); return; }
+    showExercise(data);
   } catch (e) {
-    toonLaad(true, 'Kon oefening niet laden. Ververs de pagina.');
+    showLoading(true, 'Kon oefening niet laden. Ververs de pagina.');
   }
 }
 
-function toonOefening(data) {
-  staat.huidigType    = data.type;
-  staat.huidigAntwoord = null;
+function showExercise(data) {
+  state.currentType   = data.type;
+  state.currentAnswer = null;
 
   el.label.textContent = data.label  || '';
   el.extra.innerHTML   = '';
-  el.vraag.classList.remove('lang-vraag');
+  el.question.classList.remove('lang-vraag');
 
-  const vraagTekst = data.vraag || '';
+  const questionText = data.vraag || '';
 
-  // Taal woord: grote weergave
-  if (data.type === 'keuze' && vraagTekst && isNaN(vraagTekst)) {
-    el.vraag.innerHTML = `<span class="taal-woord-display">${esc(vraagTekst)}</span>`;
+  if (data.type === 'keuze' && questionText && isNaN(questionText)) {
+    el.question.innerHTML = `<span class="taal-woord-display">${esc(questionText)}</span>`;
   } else {
-    el.vraag.textContent = vraagTekst;
+    el.question.textContent = questionText;
   }
 
-  if (vraagTekst.length > 40) el.vraag.classList.add('lang-vraag');
+  if (questionText.length > 40) el.question.classList.add('lang-vraag');
 
   switch (data.type) {
-    case 'invul':      setupInvul(data);      break;
-    case 'keuze':      setupKeuze(data);      break;
-    case 'ordenen':    setupOrdenen(data);    break;
-    case 'klok':       setupKlok(data);       break;
-    case 'rekenslang': setupRekenslang(data); break;
-    case 'pictogram':  setupPictogram(data);  break;
-    default:           setupInvul(data);
+    case 'invul':      setupFill(data);        break;
+    case 'keuze':      setupChoice(data);      break;
+    case 'ordenen':    setupOrdering(data);    break;
+    case 'klok':       setupClock(data);       break;
+    case 'rekenslang': setupNumberSnake(data); break;
+    case 'pictogram':  setupPictogram(data);   break;
+    default:           setupFill(data);
   }
 
-  toonLaad(false);
-  el.kaart.classList.add('pop-in');
-  setTimeout(() => el.kaart.classList.remove('pop-in'), 350);
+  showLoading(false);
+  el.card.classList.add('pop-in');
+  setTimeout(() => el.card.classList.remove('pop-in'), 350);
 }
 
 /* ── Setup per type ────────────────────────────────────── */
-function setupInvul(data) {
-  toonZone('invul');
-  toonNumpad(true, data.hint || '');
+function setupFill(data) {
+  showZone('fill');
+  showNumpad(true, data.hint || '');
 }
 
-function setupKeuze(data) {
-  el.keuzeKnoppen.innerHTML = '';
-  staat.huidigAntwoord = null;
+function setupChoice(data) {
+  el.choiceButtons.innerHTML = '';
+  state.currentAnswer = null;
   (data.opties || []).forEach(opt => {
     const btn = document.createElement('button');
     btn.className   = 'keuze-knop';
@@ -132,143 +131,143 @@ function setupKeuze(data) {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.keuze-knop').forEach(b => b.classList.remove('geselecteerd'));
       btn.classList.add('geselecteerd');
-      staat.huidigAntwoord = opt;
-      el.indienenKnop.disabled = false;
+      state.currentAnswer = opt;
+      el.submitBtn.disabled = false;
     });
-    el.keuzeKnoppen.appendChild(btn);
+    el.choiceButtons.appendChild(btn);
   });
-  toonZone('keuze');
-  el.indienenKnop.disabled = true;
+  showZone('choice');
+  el.submitBtn.disabled = true;
 }
 
-function setupOrdenen(data) {
-  staat.ordenenPool    = [...data.getallen];
-  staat.ordenenGekozen = [];
-  renderOrdenen();
-  toonZone('ordenen');
-  el.indienenKnop.disabled = true;
+function setupOrdering(data) {
+  state.orderingPool   = [...data.getallen];
+  state.orderingChosen = [];
+  renderOrdering();
+  showZone('ordering');
+  el.submitBtn.disabled = true;
 }
 
-function renderOrdenen() {
-  el.ordenenRij.innerHTML  = '';
-  el.ordenenAntw.innerHTML = '';
+function renderOrdering() {
+  el.orderingRow.innerHTML    = '';
+  el.orderingAnswer.innerHTML = '';
 
-  staat.ordenenPool.forEach((n, i) => {
+  state.orderingPool.forEach((n, i) => {
     const btn = document.createElement('button');
     btn.className   = 'getal-chip';
     btn.textContent = n;
     btn.dataset.idx = i;
-    if (staat.ordenenGekozen.includes(i)) btn.classList.add('gebruikt');
+    if (state.orderingChosen.includes(i)) btn.classList.add('gebruikt');
     btn.addEventListener('click', () => {
       if (btn.classList.contains('gebruikt')) return;
       btn.classList.add('gebruikt');
-      staat.ordenenGekozen.push(i);
-      voegAntwoordChipToe(n, i);
-      if (staat.ordenenGekozen.length === staat.ordenenPool.length) {
-        el.indienenKnop.disabled = false;
+      state.orderingChosen.push(i);
+      addAnswerChip(n, i);
+      if (state.orderingChosen.length === state.orderingPool.length) {
+        el.submitBtn.disabled = false;
       }
     });
-    el.ordenenRij.appendChild(btn);
+    el.orderingRow.appendChild(btn);
   });
 
-  staat.ordenenGekozen.forEach(idx => voegAntwoordChipToe(staat.ordenenPool[idx], idx));
+  state.orderingChosen.forEach(idx => addAnswerChip(state.orderingPool[idx], idx));
 }
 
-function voegAntwoordChipToe(n, idx) {
+function addAnswerChip(n, idx) {
   const chip = document.createElement('div');
   chip.className   = 'antwoord-chip';
   chip.textContent = n;
   chip.title       = 'Tik om te verwijderen';
   chip.addEventListener('click', () => {
-    const pos = staat.ordenenGekozen.indexOf(idx);
-    if (pos !== -1) staat.ordenenGekozen.splice(pos, 1);
-    renderOrdenen();
-    el.indienenKnop.disabled = staat.ordenenGekozen.length < staat.ordenenPool.length;
+    const pos = state.orderingChosen.indexOf(idx);
+    if (pos !== -1) state.orderingChosen.splice(pos, 1);
+    renderOrdering();
+    el.submitBtn.disabled = state.orderingChosen.length < state.orderingPool.length;
   });
-  el.ordenenAntw.appendChild(chip);
+  el.orderingAnswer.appendChild(chip);
 }
 
-function resetOrdenen() {
-  staat.ordenenGekozen = [];
-  renderOrdenen();
-  el.indienenKnop.disabled = true;
+function resetOrdering() {
+  state.orderingChosen = [];
+  renderOrdering();
+  el.submitBtn.disabled = true;
 }
 
-function setupKlok(data) {
-  el.klokSvg.innerHTML = data.svg || '';
+function setupClock(data) {
+  el.clockSvg.innerHTML = data.svg || '';
 
   if (data.klok_invoer === 'keuze') {
-    let klokKeuze = document.getElementById('klok-keuze');
-    if (!klokKeuze) {
-      klokKeuze = document.createElement('div');
-      klokKeuze.id = 'klok-keuze';
-      klokKeuze.className = 'keuze-knoppen';
-      el.klokZone.appendChild(klokKeuze);
+    let clockChoice = document.getElementById('klok-keuze');
+    if (!clockChoice) {
+      clockChoice = document.createElement('div');
+      clockChoice.id = 'klok-keuze';
+      clockChoice.className = 'keuze-knoppen';
+      el.clockZone.appendChild(clockChoice);
     }
-    klokKeuze.innerHTML = '';
-    staat.huidigAntwoord = null;
+    clockChoice.innerHTML = '';
+    state.currentAnswer = null;
     (data.opties || []).forEach(opt => {
       const btn = document.createElement('button');
       btn.className   = 'keuze-knop';
       btn.textContent = opt;
       btn.addEventListener('click', () => {
-        klokKeuze.querySelectorAll('.keuze-knop').forEach(b => b.classList.remove('geselecteerd'));
+        clockChoice.querySelectorAll('.keuze-knop').forEach(b => b.classList.remove('geselecteerd'));
         btn.classList.add('geselecteerd');
-        staat.huidigAntwoord = opt;
-        el.indienenKnop.disabled = false;
+        state.currentAnswer = opt;
+        el.submitBtn.disabled = false;
       });
-      klokKeuze.appendChild(btn);
+      clockChoice.appendChild(btn);
     });
-    toonZone('klok');
-    toonNumpad(false);
-    el.indienenKnop.disabled = true;
+    showZone('clock');
+    showNumpad(false);
+    el.submitBtn.disabled = true;
   } else {
-    const bestaandKeuze = document.getElementById('klok-keuze');
-    if (bestaandKeuze) bestaandKeuze.innerHTML = '';
-    toonZone('klok');
-    toonNumpad(true, 'Typ het uur (1–12)');
+    const existing = document.getElementById('klok-keuze');
+    if (existing) existing.innerHTML = '';
+    showZone('clock');
+    showNumpad(true, 'Typ het uur (1–12)');
   }
 }
 
-function setupRekenslang(data) {
-  el.rekenslangKeten.innerHTML = '';
+function setupNumberSnake(data) {
+  el.numberSnakeChain.innerHTML = '';
 
   const startEl = document.createElement('div');
   startEl.className   = 'rsl-getal start';
   startEl.textContent = data.start;
-  el.rekenslangKeten.appendChild(startEl);
+  el.numberSnakeChain.appendChild(startEl);
 
-  (data.keten || []).forEach(stap => {
-    const stapEl = document.createElement('div');
-    stapEl.className = 'rsl-stap';
-    stapEl.innerHTML = `<span class="rsl-op">${esc(stap.op)}</span><span class="rsl-pijl">→</span>`;
-    el.rekenslangKeten.appendChild(stapEl);
+  (data.keten || []).forEach(step => {
+    const stepEl = document.createElement('div');
+    stepEl.className = 'rsl-stap';
+    stepEl.innerHTML = `<span class="rsl-op">${esc(step.op)}</span><span class="rsl-pijl">→</span>`;
+    el.numberSnakeChain.appendChild(stepEl);
 
-    const naarEl = document.createElement('div');
-    naarEl.className   = 'rsl-getal' + (stap.naar === '?' ? ' ontbreekt' : '');
-    naarEl.textContent = stap.naar;
-    el.rekenslangKeten.appendChild(naarEl);
+    const toEl = document.createElement('div');
+    toEl.className   = 'rsl-getal' + (step.naar === '?' ? ' ontbreekt' : '');
+    toEl.textContent = step.naar;
+    el.numberSnakeChain.appendChild(toEl);
   });
 
-  toonZone('rekenslang');
-  toonNumpad(true);
+  showZone('numberSnake');
+  showNumpad(true);
 }
 
 function setupPictogram(data) {
   renderPictogram(data);
-  staat.huidigType = data.invoer === 'getal' ? 'invul' : 'keuze';
-  if (data.invoer === 'getal') setupInvul(data);
-  else setupKeuze(data);
+  state.currentType = data.invoer === 'getal' ? 'invul' : 'keuze';
+  if (data.invoer === 'getal') setupFill(data);
+  else setupChoice(data);
 }
 
 function renderPictogram(data) {
   let html = `<div class="pictogram-tabel">`;
   html += `<div class="pic-titel">${esc(data.emoji)} ${esc(data.titel)}</div>`;
-  (data.rijen || []).forEach(rij => {
-    const dots = Array(rij.aantal).fill('<span class="pic-dot"></span>').join('');
+  (data.rijen || []).forEach(row => {
+    const dots = Array(row.aantal).fill('<span class="pic-dot"></span>').join('');
     html += `<div class="pic-rij">`;
-    html += `<span class="pic-naam">${esc(rij.naam)}</span>`;
-    html += `<span class="pic-balk">${dots}<strong class="pic-getal">${rij.aantal}</strong></span>`;
+    html += `<span class="pic-naam">${esc(row.naam)}</span>`;
+    html += `<span class="pic-balk">${dots}<strong class="pic-getal">${row.aantal}</strong></span>`;
     html += `</div>`;
   });
   html += `</div>`;
@@ -276,120 +275,120 @@ function renderPictogram(data) {
 }
 
 /* ── Numpad ────────────────────────────────────────────── */
-function toonNumpad(zichtbaar, hint = '') {
-  el.numpad.classList.toggle('verborgen', !zichtbaar);
-  el.indienenKnop.classList.toggle('verborgen', zichtbaar);
-  if (zichtbaar) resetNumpad(hint);
+function showNumpad(visible, hint = '') {
+  el.numpad.classList.toggle('verborgen', !visible);
+  el.submitBtn.classList.toggle('verborgen', visible);
+  if (visible) resetNumpad(hint);
 }
 
 function resetNumpad(hint = '') {
-  staat.numVal = '';
+  state.numVal = '';
   el.numpadHint.textContent = hint;
   updateNumpad();
 }
 
 function updateNumpad() {
-  const val = staat.numVal;
+  const val = state.numVal;
   el.numpadDisplay.textContent = val || '?';
   el.numpadDisplay.classList.toggle('leeg', val === '');
   el.npOk.disabled = val === '';
 }
 
 function addDigit(d) {
-  if (staat.numVal.length >= 3) return;
-  staat.numVal += d;
+  if (state.numVal.length >= 3) return;
+  state.numVal += d;
   updateNumpad();
 }
 
-function wisDigit() {
-  staat.numVal = staat.numVal.slice(0, -1);
+function deleteDigit() {
+  state.numVal = state.numVal.slice(0, -1);
   updateNumpad();
 }
 
-/* ── Antwoord indienen ─────────────────────────────────── */
-async function dienIn() {
-  const antwoord = haalAntwoord();
-  if (antwoord === null || antwoord === '') return;
+/* ── Submit answer ─────────────────────────────────────── */
+async function submit() {
+  const answer = getAnswer();
+  if (answer === null || answer === '') return;
 
-  el.indienenKnop.disabled = true;
+  el.submitBtn.disabled = true;
   el.npOk.disabled = true;
 
   try {
     const fd = new FormData();
-    fd.append('antwoord', antwoord);
+    fd.append('antwoord', answer);
 
-    const res  = await fetch('api/antwoord.php', {
+    const res  = await fetch('api/answer.php', {
       method: 'POST',
       headers: { 'X-CSRF-Token': CSRF },
       body: fd,
     });
     const data = await res.json();
 
-    staat.scoreTotaal++;
-    if (data.correct) staat.scoreCorrect++;
-    el.scoreCorrect.textContent = staat.scoreCorrect;
-    el.scoreTotaal.textContent  = staat.scoreTotaal;
+    state.scoreTotal++;
+    if (data.correct) state.scoreCorrect++;
+    el.scoreCorrect.textContent = state.scoreCorrect;
+    el.scoreTotal.textContent   = state.scoreTotal;
 
-    toonFeedback(data.correct, data.bericht);
+    showFeedback(data.correct, data.bericht);
 
   } catch (e) {
-    el.indienenKnop.disabled = false;
+    el.submitBtn.disabled = false;
   }
 }
 
-function haalAntwoord() {
-  switch (staat.huidigType) {
-    case 'invul':      return staat.numVal;
-    case 'keuze':      return staat.huidigAntwoord;
+function getAnswer() {
+  switch (state.currentType) {
+    case 'invul':      return state.numVal;
+    case 'keuze':      return state.currentAnswer;
     case 'klok':
-      return staat.huidigAntwoord !== null ? staat.huidigAntwoord : staat.numVal;
-    case 'rekenslang': return staat.numVal;
+      return state.currentAnswer !== null ? state.currentAnswer : state.numVal;
+    case 'rekenslang': return state.numVal;
     case 'ordenen':
-      return staat.ordenenGekozen.map(i => staat.ordenenPool[i]).join(',');
+      return state.orderingChosen.map(i => state.orderingPool[i]).join(',');
     default:           return null;
   }
 }
 
 /* ── Feedback ──────────────────────────────────────────── */
-function toonFeedback(correct, bericht) {
+function showFeedback(correct, message) {
   el.feedback.className = 'feedback ' + (correct ? 'correct' : 'incorrect');
-  el.fbIcoon.textContent  = correct ? '🎉' : '😬';
-  el.fbBericht.textContent = bericht;
+  el.fbIcon.textContent    = correct ? '🎉' : '😬';
+  el.fbMessage.textContent = message;
 
   el.feedback.classList.remove('verborgen');
 
-  const wacht = correct ? 1400 : 2400;
+  const delay = correct ? 1400 : 2400;
   setTimeout(() => {
     el.feedback.classList.add('verborgen');
-    laadVolgendeOefening();
-  }, wacht);
+    loadNextExercise();
+  }, delay);
 }
 
 /* ── Helpers ───────────────────────────────────────────── */
-function toonLaad(zichtbaar, tekst) {
-  el.laad.textContent  = tekst || 'Even laden...';
-  el.laad.style.display = zichtbaar ? 'block' : 'none';
-  el.kaart.classList.toggle('verborgen', zichtbaar);
+function showLoading(visible, text) {
+  el.loading.textContent  = text || 'Even laden...';
+  el.loading.style.display = visible ? 'block' : 'none';
+  el.card.classList.toggle('verborgen', visible);
 }
 
-function verbergAlleZones() {
-  [el.invulZone, el.keuzeZone, el.ordenenZone,
-   el.klokZone, el.rekenslangZone].forEach(z => z.classList.add('verborgen'));
+function hideAllZones() {
+  [el.fillZone, el.choiceZone, el.orderingZone,
+   el.clockZone, el.numberSnakeZone].forEach(z => z.classList.add('verborgen'));
   el.numpad.classList.add('verborgen');
-  el.indienenKnop.classList.remove('verborgen');
-  el.indienenKnop.disabled = true;
+  el.submitBtn.classList.remove('verborgen');
+  el.submitBtn.disabled = true;
 }
 
-function toonZone(naam) {
+function showZone(name) {
   const map = {
-    invul:      el.invulZone,
-    keuze:      el.keuzeZone,
-    ordenen:    el.ordenenZone,
-    klok:       el.klokZone,
-    rekenslang: el.rekenslangZone,
+    fill:        el.fillZone,
+    choice:      el.choiceZone,
+    ordering:    el.orderingZone,
+    clock:       el.clockZone,
+    numberSnake: el.numberSnakeZone,
   };
   Object.values(map).forEach(z => z.classList.add('verborgen'));
-  if (map[naam]) map[naam].classList.remove('verborgen');
+  if (map[name]) map[name].classList.remove('verborgen');
 }
 
 function esc(str) {
