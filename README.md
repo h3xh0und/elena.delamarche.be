@@ -46,18 +46,6 @@ The UI is entirely in Dutch.
 - Session cookies are `HttpOnly`, `SameSite=Lax`, and `Secure` on HTTPS
 - Security headers: `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`
 
-## Deployment
-
-The included GitHub Actions workflow deploys to a shared hosting server via FTP on every push to `main`. Configure these repository secrets:
-
-| Secret | Description |
-|--------|-------------|
-| `FTP_SERVER` | FTP hostname |
-| `FTP_USERNAME` | FTP username |
-| `FTP_PASSWORD` | FTP password |
-
-User data (`data/users/`, `data/progress/`, `data/ratelimit/`) and `setup.php` are excluded from deployment.
-
 ## Project structure
 
 ```
