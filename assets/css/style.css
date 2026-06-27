@@ -1043,7 +1043,7 @@ input  { font-family: var(--font); }
   display: flex;
   flex-direction: column;
 }
-.site-page > main { flex: 1; }
+.site-page > main { flex: 1; width: 100%; min-width: 0; }
 
 /* ── Footer ─────────────────────────────────────────────── */
 .site-footer {
