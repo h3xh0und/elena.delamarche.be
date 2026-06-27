@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="site-page">
 
 <header class="site-header">
     <div class="header-inhoud">
@@ -111,7 +111,7 @@
             <a href="mailto:hello@jonasdlm.be" style="color:var(--primair)">hello@jonasdlm.be</a>
         </p>
         <p class="inst-omschrijving" style="margin-top:.5rem;color:var(--tekst-zacht);font-size:.9rem">
-            Verantwoordelijke: Jonas Delamarche · Laatste aanpassing: juni 2025
+            Verantwoordelijke: Jonas De la Marche · Laatste aanpassing: juni 2025
         </p>
     </div>
 

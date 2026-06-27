@@ -30,7 +30,7 @@ function progressBar(array $stats): string {
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="site-page">
 
 <header class="site-header">
     <div class="header-inhoud">

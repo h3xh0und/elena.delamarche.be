@@ -86,10 +86,12 @@ input  { font-family: var(--font); }
 /* ── Auth pagina ──────────────────────────────────────── */
 .auth-pagina {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   padding: 1rem;
+  gap: 1rem;
 }
 
 .auth-kaart {
@@ -331,7 +333,7 @@ input  { font-family: var(--font); }
   padding: 2rem;
 }
 
-.oefening-kaart {
+.oefening-pagina .oefening-kaart {
   background: var(--kaart);
   border-radius: var(--radius);
   box-shadow: var(--schaduw-groot);
@@ -1000,7 +1002,7 @@ input  { font-family: var(--font); }
 @media (orientation: landscape) {
   /* Minder padding rond de kaart */
   .oefening-main   { padding: .5rem .75rem .75rem; }
-  .oefening-kaart  { padding: 1rem 1.25rem; flex-direction: row; align-items: center; gap: 1rem; }
+  .oefening-pagina .oefening-kaart  { padding: 1rem 1.25rem; flex-direction: row; align-items: center; gap: 1rem; }
 
   /* Inhoud links, numpad rechts */
   .oef-inhoud  { gap: .75rem; align-items: flex-start; }
@@ -1031,9 +1033,17 @@ input  { font-family: var(--font); }
 
 @media (min-width: 640px) {
   .auth-kaart { padding: 3rem 2.5rem; }
-  .oefening-kaart { padding: 2.5rem 2rem 2.25rem; }
+  .oefening-pagina .oefening-kaart { padding: 2.5rem 2rem 2.25rem; }
   .oef-vraag-tekst { font-size: 2.4rem; }
 }
+
+/* ── Sticky footer (dashboard, settings, privacy) ───────── */
+.site-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.site-page > main { flex: 1; }
 
 /* ── Footer ─────────────────────────────────────────────── */
 .site-footer {

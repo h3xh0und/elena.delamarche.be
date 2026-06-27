@@ -28,7 +28,7 @@ $clockLevels = [
 <link rel="stylesheet" href="assets/css/style.css">
 <meta name="csrf-token" content="<?= $csrf ?>">
 </head>
-<body>
+<body class="site-page">
 
 <header class="site-header">
     <div class="header-inhoud">
