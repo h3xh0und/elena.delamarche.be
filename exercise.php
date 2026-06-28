@@ -116,7 +116,7 @@ $csrf     = csrfToken();
     const CATEGORIE = <?= json_encode($cat) ?>;
     const CSRF      = <?= json_encode($csrf) ?>;
 </script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=2"></script>
 
 </body>
 </html>
