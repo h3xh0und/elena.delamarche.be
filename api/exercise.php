@@ -21,6 +21,11 @@ if (!$cat) {
 }
 
 global $CATEGORIES;
+if (empty($CATEGORIES) || !isset($CATEGORIES['arithmetic']['exercises'])) {
+    http_response_code(500);
+    echo json_encode(['fout' => 'Configuratie ontbreekt — herlaad de pagina']);
+    exit;
+}
 $arithmeticTypes = array_keys($CATEGORIES['arithmetic']['exercises']);
 
 $user       = currentUser();

@@ -17,7 +17,7 @@ foreach ($CATEGORIES as $catKey => $category) {
     }
 }
 
-if (!$found) {
+if (!$cat || !$found) {
     header('Location: dashboard.php');
     exit;
 }

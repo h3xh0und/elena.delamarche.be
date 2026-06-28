@@ -2,6 +2,7 @@
 define('DATA_DIR',     __DIR__ . '/../data');
 define('USERS_DIR',    DATA_DIR . '/users');
 define('PROGRESS_DIR', DATA_DIR . '/progress');
+define('RATELIMIT_DIR', DATA_DIR . '/ratelimit');
 
 $CATEGORIES = [
     'arithmetic' => [

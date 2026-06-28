@@ -10,7 +10,8 @@ function _progressPath(string $name): string {
 }
 
 function _rateLimitPath(string $name): string {
-    return DATA_DIR . '/ratelimit/' . hash('sha256', mb_strtolower(trim($name))) . '.json';
+    $dir = defined('RATELIMIT_DIR') ? RATELIMIT_DIR : DATA_DIR . '/ratelimit';
+    return $dir . '/' . hash('sha256', mb_strtolower(trim($name))) . '.json';
 }
 
 function _writeJson(string $path, array $data): bool {
