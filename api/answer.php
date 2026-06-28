@@ -71,7 +71,8 @@ try {
 
 } catch (Throwable $e) {
     ob_end_clean();
+    error_log('answer API: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
     if (!headers_sent()) header('Content-Type: application/json');
     http_response_code(500);
-    echo json_encode(['fout' => $e->getMessage()]);
+    echo json_encode(['fout' => 'Kon antwoord niet verwerken. Ververs de pagina.']);
 }
