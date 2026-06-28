@@ -1,6 +1,8 @@
 <?php
 // Temporary diagnostic — delete this file after use
-if (($_GET['t'] ?? '') !== 'elena2025') { http_response_code(404); exit; }
+require_once 'includes/auth.php';
+$token = $_GET['t'] ?? '';
+if (!isLoggedIn() || !hash_equals('elena2025', $token)) { http_response_code(404); exit; }
 
 echo '<pre>';
 
