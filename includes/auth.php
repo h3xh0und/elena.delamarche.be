@@ -13,6 +13,11 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 function isLoggedIn(): bool {
+    // 'kind' was the old session key before the rename to 'user'
+    if (!empty($_SESSION['kind']) && empty($_SESSION['user'])) {
+        $_SESSION['user'] = $_SESSION['kind'];
+        unset($_SESSION['kind']);
+    }
     return !empty($_SESSION['user']);
 }
 
