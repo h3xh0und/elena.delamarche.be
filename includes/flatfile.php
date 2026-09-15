@@ -197,21 +197,65 @@ function checkRateLimit(string $name): bool {
     return empty($data['blocked_until']) || time() >= (int)$data['blocked_until'];
 }
 
+function getRateLimitInfo(string $name): array {
+    $path = _rateLimitPath($name);
+    $data = _readJson($path);
+    if (!$data) return ['blocked' => false, 'remaining' => 0];
+    
+    $blockedUntil = (int)($data['blocked_until'] ?? 0);
+    $now = time();
+    
+    if ($blockedUntil > $now) {
+        return [
+            'blocked' => true,
+            'remaining' => $blockedUntil - $now
+        ];
+    }
+    
+    return ['blocked' => false, 'remaining' => 0];
+}
+
 function registerFailedAttempt(string $name): void {
     $dir = DATA_DIR . '/ratelimit';
     if (!is_dir($dir)) mkdir($dir, 0755, true);
     $path = _rateLimitPath($name);
     $now  = time();
-    $data = _readJson($path) ?? ['attempts' => [], 'blocked_until' => 0];
+    $data = _readJson($path) ?? ['attempts' => [], 'blocked_until' => 0, 'total_failures' => 0];
 
+    // Clean up old attempts (older than 1 hour)
     $data['attempts'] = array_values(array_filter(
         $data['attempts'] ?? [],
-        fn($t) => $t > $now - 300
+        fn($t) => $t > $now - 3600
     ));
     $data['attempts'][] = $now;
-
-    if (count($data['attempts']) >= 5) {
-        $data['blocked_until'] = $now + 300;
+    
+    // Track total failures for progressive lockout
+    $data['total_failures'] = ($data['total_failures'] ?? 0) + 1;
+    $totalFailures = $data['total_failures'];
+    
+    // Progressive lockout with exponential backoff
+    $recentAttempts = count($data['attempts']);
+    
+    if ($recentAttempts >= 3) {
+        // Calculate lockout duration based on total failures
+        // 3-5 attempts: 5 minutes
+        // 6-10 attempts: 15 minutes
+        // 11-20 attempts: 1 hour
+        // 21-50 attempts: 6 hours
+        // 51+ attempts: 24 hours
+        if ($totalFailures <= 5) {
+            $lockoutDuration = 300; // 5 minutes
+        } elseif ($totalFailures <= 10) {
+            $lockoutDuration = 900; // 15 minutes
+        } elseif ($totalFailures <= 20) {
+            $lockoutDuration = 3600; // 1 hour
+        } elseif ($totalFailures <= 50) {
+            $lockoutDuration = 21600; // 6 hours
+        } else {
+            $lockoutDuration = 86400; // 24 hours
+        }
+        
+        $data['blocked_until'] = $now + $lockoutDuration;
     }
 
     _writeJson($path, $data);
@@ -219,5 +263,8 @@ function registerFailedAttempt(string $name): void {
 
 function resetRateLimit(string $name): void {
     $path = _rateLimitPath($name);
-    if (file_exists($path)) unlink($path);
+    if (file_exists($path)) {
+        // Reset the rate limit data completely on successful login
+        _writeJson($path, ['attempts' => [], 'blocked_until' => 0, 'total_failures' => 0]);
+    }
 }

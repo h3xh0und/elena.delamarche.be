@@ -104,16 +104,16 @@ $clockLevels = [
 
         <div class="inst-form">
             <label for="oude-pin">Huidige pincode:</label>
-            <input type="password" id="oude-pin" maxlength="4" inputmode="numeric"
-                   pattern="\d{4}" placeholder="••••" autocomplete="current-password">
+            <input type="password" id="oude-pin" minlength="6" maxlength="12" inputmode="numeric"
+                   pattern="\d{6,12}" placeholder="••••••" autocomplete="current-password">
 
             <label for="nieuwe-pin">Nieuwe pincode:</label>
-            <input type="password" id="nieuwe-pin" maxlength="4" inputmode="numeric"
-                   pattern="\d{4}" placeholder="••••" autocomplete="new-password">
+            <input type="password" id="nieuwe-pin" minlength="6" maxlength="12" inputmode="numeric"
+                   pattern="\d{6,12}" placeholder="••••••" autocomplete="new-password">
 
             <label for="herhaal-pin">Nieuwe pincode herhalen:</label>
-            <input type="password" id="herhaal-pin" maxlength="4" inputmode="numeric"
-                   pattern="\d{4}" placeholder="••••" autocomplete="new-password">
+            <input type="password" id="herhaal-pin" minlength="6" maxlength="12" inputmode="numeric"
+                   pattern="\d{6,12}" placeholder="••••••" autocomplete="new-password">
 
             <button class="btn btn-groen" id="wijzig-pin" style="margin-top:.5rem">
                 Pincode wijzigen
