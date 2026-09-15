@@ -25,11 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pin2   = $_POST['pin2'] ?? '';
 
         if ($exists) {
-            if (!preg_match('/^\d{4}$/', $pin)) {
-                $error = 'Vul je 4-cijferige pincode in.';
+            if (!preg_match('/^\d{6,12}$/', $pin)) {
+                $error = 'Vul je pincode in (6 tot 12 cijfers).';
                 $step  = 2;
             } elseif (!checkRateLimit($name)) {
-                $error = 'Te veel mislukte pogingen. Wacht 5 minuten en probeer opnieuw.';
+                $lockInfo = getRateLimitInfo($name);
+                $minutes = ceil($lockInfo['remaining'] / 60);
+                $error = "Te veel mislukte pogingen. Account tijdelijk geblokkeerd. Probeer over {$minutes} minuten opnieuw.";
                 $step  = 2;
             } elseif (!verifyPin($name, $pin)) {
                 registerFailedAttempt($name);
@@ -42,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } else {
-            if (!preg_match('/^\d{4}$/', $pin)) {
-                $error = 'Kies een pincode van precies 4 cijfers.';
+            if (!preg_match('/^\d{6,12}$/', $pin)) {
+                $error = 'Kies een pincode van 6 tot 12 cijfers.';
                 $step  = 2;
             } elseif ($pin !== $pin2) {
                 $error = 'De twee pincodes zijn niet gelijk. Probeer opnieuw.';
@@ -106,19 +108,19 @@ $nameHtml = htmlspecialchars($name);
 
         <?php if ($exists): ?>
         <p class="welkom-terug">Welkom terug, <strong><?= $nameHtml ?></strong>! 👋</p>
-        <label for="pin">Jouw pincode (4 cijfers):</label>
-        <input type="password" id="pin" name="pin" maxlength="4" pattern="\d{4}"
-               inputmode="numeric" placeholder="••••" required autofocus>
+        <label for="pin">Jouw pincode (6-12 cijfers):</label>
+        <input type="password" id="pin" name="pin" minlength="6" maxlength="12" pattern="\d{6,12}"
+               inputmode="numeric" placeholder="••••••" required autofocus>
         <button type="submit" class="btn btn-primair btn-groot">Inloggen</button>
 
         <?php else: ?>
         <p class="welkom-nieuw">Hallo <strong><?= $nameHtml ?></strong>! Kies een pincode 🎉</p>
-        <label for="pin">Kies een pincode (4 cijfers):</label>
-        <input type="password" id="pin" name="pin" maxlength="4" pattern="\d{4}"
-               inputmode="numeric" placeholder="••••" required autofocus>
+        <label for="pin">Kies een pincode (6-12 cijfers):</label>
+        <input type="password" id="pin" name="pin" minlength="6" maxlength="12" pattern="\d{6,12}"
+               inputmode="numeric" placeholder="••••••" required autofocus>
         <label for="pin2">Herhaal je pincode:</label>
-        <input type="password" id="pin2" name="pin2" maxlength="4" pattern="\d{4}"
-               inputmode="numeric" placeholder="••••" required>
+        <input type="password" id="pin2" name="pin2" minlength="6" maxlength="12" pattern="\d{6,12}"
+               inputmode="numeric" placeholder="••••••" required>
         <button type="submit" class="btn btn-groen btn-groot">Account aanmaken</button>
         <?php endif; ?>
 
