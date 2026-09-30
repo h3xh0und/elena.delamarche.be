@@ -14,6 +14,7 @@ function generateArithmeticExercise(string $type, int $maxNumber = 20, string $c
         'compare'       => rCompare($mx),
         'ordering'      => rOrdering($mx),
         'clock'         => rClock($clockLevel),
+        'digital_clock' => rDigitalClock($clockLevel),
         'jumps'         => rJumps($mx, $jumpStep),
         'number_snake'  => rNumberSnake($mx),
         'missing'       => rMissing($mx),
@@ -171,40 +172,20 @@ function rOrdering(int $max = 20): array {
 }
 
 function rClock(string $level = 'hour'): array {
-    $hour = rand(1, 12);
+    [$hour, $minutes] = _clockRandomTime($level);
 
-    if ($level === 'hour') {
+    // Half of the time: write the time as on a digital clock
+    if (rand(0, 1)) {
         return [
             'type'        => 'klok',
-            'vraag'       => 'Hoe laat is het?',
+            'label'       => 'Schrijf de tijd zoals op een digitale klok:',
+            'vraag'       => '',
             'uur'         => $hour,
-            'minuten'     => 0,
-            'klok_invoer' => 'getal',
-            'antwoord'    => (string)$hour,
-            'hint'        => 'Typ alleen het uur (bijv. 3)',
+            'minuten'     => $minutes,
+            'klok_invoer' => 'tijd',
+            'antwoord'    => _clockDigital($hour, $minutes),
         ];
     }
-
-    $minutePool = match ($level) {
-        'half_hour' => [0, 30],
-        'quarter'   => [0, 15, 30, 45],
-        '5_min'     => [0,5,10,15,20,25,30,35,40,45,50,55],
-        'minute'    => range(0, 59),
-        default     => [0],
-    };
-    $minutes = $minutePool[array_rand($minutePool)];
-    $digital = in_array($level, ['5_min', 'minute']);
-    $correct = _clockTimeStr($hour, $minutes, $digital);
-
-    $options  = [$correct];
-    $attempts = 0;
-    while (count($options) < 4 && $attempts++ < 200) {
-        $h   = rand(1, 12);
-        $m   = $minutePool[array_rand($minutePool)];
-        $str = _clockTimeStr($h, $m, $digital);
-        if (!in_array($str, $options)) $options[] = $str;
-    }
-    shuffle($options);
 
     return [
         'type'        => 'klok',
@@ -212,23 +193,85 @@ function rClock(string $level = 'hour'): array {
         'uur'         => $hour,
         'minuten'     => $minutes,
         'klok_invoer' => 'keuze',
-        'opties'      => $options,
-        'antwoord'    => $correct,
+        'opties'      => _clockWordOptions($hour, $minutes, $level),
+        'antwoord'    => _clockWords($hour, $minutes),
     ];
 }
 
-function _clockTimeStr(int $hour, int $minutes, bool $digital): string {
-    if ($digital) return sprintf('%d:%02d', $hour, $minutes);
-    $next = ($hour % 12) + 1;
-    return match ($minutes) {
-        0  => "$hour uur",
-        15 => "kwart over $hour",
-        30 => "half $next",
-        45 => "kwart voor $next",
-        default => $minutes < 30
-            ? "$minutes over $hour"
-            : (60 - $minutes) . " voor $next",
+function rDigitalClock(string $level = 'hour'): array {
+    [$hour, $minutes] = _clockRandomTime($level);
+
+    // Read the digital clock and pick the time in words
+    if (rand(0, 1)) {
+        return [
+            'type'        => 'klok',
+            'vraag'       => 'Hoe laat is het?',
+            'digitaal'    => _clockDigital($hour, $minutes),
+            'klok_invoer' => 'keuze',
+            'opties'      => _clockWordOptions($hour, $minutes, $level),
+            'antwoord'    => _clockWords($hour, $minutes),
+        ];
+    }
+
+    // Time in words: write it as on a digital clock
+    return [
+        'type'        => 'klok',
+        'label'       => 'Schrijf zoals op een digitale klok:',
+        'vraag'       => _clockWords($hour, $minutes),
+        'klok_invoer' => 'tijd',
+        'antwoord'    => _clockDigital($hour, $minutes),
+    ];
+}
+
+function _clockMinutePool(string $level): array {
+    return match ($level) {
+        'half_hour' => [0, 30],
+        'quarter'   => [0, 15, 30, 45],
+        '5_min'     => [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+        'minute'    => range(0, 59),
+        default     => [0],
     };
+}
+
+function _clockRandomTime(string $level): array {
+    $pool = _clockMinutePool($level);
+    return [rand(1, 12), $pool[array_rand($pool)]];
+}
+
+function _clockDigital(int $hour, int $minutes): string {
+    return sprintf('%d:%02d', $hour, $minutes);
+}
+
+/* Time in words, the way it is taught in Flemish schools */
+function _clockWords(int $hour, int $minutes): string {
+    $next = ($hour % 12) + 1;
+    return match (true) {
+        $minutes === 0  => "$hour uur",
+        $minutes < 15   => "$minutes over $hour",
+        $minutes === 15 => "kwart over $hour",
+        $minutes < 30   => (30 - $minutes) . " voor half $next",
+        $minutes === 30 => "half $next",
+        $minutes < 45   => ($minutes - 30) . " over half $next",
+        $minutes === 45 => "kwart voor $next",
+        default         => (60 - $minutes) . " voor $next",
+    };
+}
+
+/* Four options: the right one, the classic "one hour off" mistake, and random times */
+function _clockWordOptions(int $hour, int $minutes, string $level): array {
+    $pool    = _clockMinutePool($level);
+    $correct = _clockWords($hour, $minutes);
+    $options = [$correct];
+    $nearby  = [_clockWords(($hour % 12) + 1, $minutes), _clockWords((($hour + 10) % 12) + 1, $minutes)];
+    $options[] = $nearby[array_rand($nearby)];
+
+    $attempts = 0;
+    while (count($options) < 4 && $attempts++ < 200) {
+        $str = _clockWords(rand(1, 12), $pool[array_rand($pool)]);
+        if (!in_array($str, $options)) $options[] = $str;
+    }
+    shuffle($options);
+    return $options;
 }
 
 function rJumps(int $max = 20, int $step = 2): array {

@@ -567,6 +567,50 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
   transform: none;
 }
 
+/* Digitale klok (display) */
+.digitale-klok {
+  display: inline-block;
+  font-size: clamp(2.8rem, 13vw, 4.5rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: .04em;
+  color: #7dffb3;
+  background: #1f2544;
+  border: 6px solid #3a4170;
+  border-radius: 22px;
+  padding: .15em .55em;
+  box-shadow: inset 0 0 24px rgba(0,0,0,.45), 0 6px 0 #11152e;
+  text-shadow: 0 0 14px rgba(125,255,179,.55);
+}
+.dk-dubbelpunt { animation: knipper 1s steps(1) infinite; }
+@keyframes knipper { 50% { opacity: .25; } }
+
+/* Digitale tijd invullen: uur-vakje : minuten-vakje */
+.tijd-invoer {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: clamp(2.2rem, 9vw, 3rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.tijd-deel {
+  font: inherit;
+  min-width: 2.1em;
+  min-height: var(--tik);
+  padding: 0 .25em;
+  border: 4px dashed var(--accent);
+  border-radius: 16px;
+  background: var(--accent-licht);
+  color: var(--accent-dark);
+  line-height: 1.2;
+}
+.tijd-deel.leeg   { color: var(--accent); }
+.tijd-deel.actief { border-style: solid; box-shadow: 0 0 0 4px var(--accent-licht), 0 0 0 7px var(--accent); }
+.tijd-invoer.goed .tijd-deel          { border-style: solid; border-color: var(--groen);  background: var(--groen-licht);  color: var(--groen-dark); }
+.tijd-invoer.juist-getoond .tijd-deel { border-style: solid; border-color: var(--oranje); background: var(--oranje-licht); color: var(--oranje-dark); }
+
 /* Klok + toetsen samen: toetsen iets lager zodat alles op een telefoon past */
 .oefening-kaart:has(#klok-zone:not(.verborgen)) .np-btn {
   height: clamp(48px, 7vh, 76px);

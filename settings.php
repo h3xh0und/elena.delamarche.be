@@ -12,11 +12,11 @@ $tablesMax  = readTablesMax($user);
 $csrf       = csrfToken();
 
 $clockLevels = [
-    'hour'      => ['label' => 'Hele uren',   'example' => '3:00',  'hint' => 'Typ het uur'],
+    'hour'      => ['label' => 'Hele uren',   'example' => '3:00',  'hint' => '"3 uur"'],
     'half_hour' => ['label' => 'Halve uren',  'example' => '3:30',  'hint' => '"half 4"'],
     'quarter'   => ['label' => 'Kwartier',    'example' => '3:15',  'hint' => '"kwart over 3"'],
-    '5_min'     => ['label' => '5 minuten',   'example' => '3:20',  'hint' => '"3:20"'],
-    'minute'    => ['label' => 'Per minuut',  'example' => '3:27',  'hint' => '"3:27"'],
+    '5_min'     => ['label' => '5 minuten',   'example' => '3:20',  'hint' => '"10 voor half 4"'],
+    'minute'    => ['label' => 'Per minuut',  'example' => '3:27',  'hint' => '"3 voor half 4"'],
 ];
 ?>
 <!DOCTYPE html>
@@ -84,8 +84,8 @@ $clockLevels = [
 
     <!-- Kloklezen niveau -->
     <div class="inst-kaart">
-        <h2 class="inst-titel">🕐 Kloklezen — moeilijkheidsgraad</h2>
-        <p class="inst-omschrijving">Kies hoe nauwkeurig de klok afgelezen moet worden.</p>
+        <h2 class="inst-titel">🕐 Klok lezen — moeilijkheidsgraad</h2>
+        <p class="inst-omschrijving">Geldt voor Kloklezen (wijzers) én Digitale klok.</p>
         <div class="klok-niveaus" id="klok-niveaus">
             <?php foreach ($clockLevels as $key => $info): ?>
             <button class="klok-niveau-knop <?= $key === $clockLevel ? 'actief' : '' ?>"

@@ -29,6 +29,7 @@ $CATEGORIES = [
             'neighbours'    => ['name' => 'Tellen & buren',    'emoji' => '🔢'],
             'jumps'         => ['name' => 'Sprongen',          'emoji' => '🐸'],
             'clock'         => ['name' => 'Kloklezen',         'emoji' => '🕐'],
+            'digital_clock' => ['name' => 'Digitale klok',     'emoji' => '📟'],
             'money'         => ['name' => 'Geld',              'emoji' => '💶'],
             'number_snake'  => ['name' => 'Rekenslang',        'emoji' => '🐍'],
         ],

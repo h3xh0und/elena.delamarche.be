@@ -43,8 +43,9 @@ try {
         $submittedArr = array_map('intval', explode(',', $submitted));
         $correct      = ($submittedArr === $exercise['antwoord']);
     } else {
-        $normalized = strtolower(preg_replace('/\s+uur$/i', '', trim($submitted)));
-        $expected   = strtolower(trim((string)$exercise['antwoord']));
+        $normalize  = fn(string $v) => strtolower(preg_replace('/\s+uur$/i', '', trim($v)));
+        $normalized = $normalize($submitted);
+        $expected   = $normalize((string)$exercise['antwoord']);
         $correct    = ($normalized === $expected);
     }
 

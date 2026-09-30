@@ -9,6 +9,7 @@ const state = {
   numVal:         '',     // current numeric input (numpad)
   orderingPool:   [],     // remaining numbers for ordering
   orderingChosen: [],     // chosen numbers for ordering
+  time:           null,   // digital time input: { h, m, active: 'h' | 'm' }
   round:          [],     // true/false per answered exercise in this round
   locked:         false,  // input blocked while checking / showing feedback
   waiting:        false,  // feedback shown, waiting for "Verder"
@@ -84,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (el.numpad.classList.contains('verborgen')) return;
-    if (e.key >= '0' && e.key <= '9') { addDigit(e.key); e.preventDefault(); }
+    if (state.time && (e.key === ':' || e.key === '.')) { selectTimePart('m'); e.preventDefault(); }
+    else if (e.key >= '0' && e.key <= '9') { addDigit(e.key); e.preventDefault(); }
     else if (e.key === 'Backspace')    { deleteDigit();    e.preventDefault(); }
   });
 });
@@ -143,6 +145,7 @@ async function loadNextExercise() {
 function showExercise(data) {
   state.currentType   = data.type;
   state.currentAnswer = null;
+  state.time          = null;
   state.locked        = false;
 
   hideAllZones();
@@ -266,7 +269,16 @@ function resetOrdering() {
 }
 
 function setupClock(data) {
-  el.clockSvg.innerHTML = data.svg || '';
+  if (data.svg) {
+    el.clockSvg.innerHTML = data.svg;
+  } else if (data.digitaal) {
+    const [h, m] = String(data.digitaal).split(':');
+    el.clockSvg.innerHTML = `<div class="digitale-klok" aria-label="Digitale klok: ${esc(data.digitaal)}">`
+      + `${esc(h)}<span class="dk-dubbelpunt">:</span>${esc(m)}</div>`;
+  } else {
+    el.clockSvg.innerHTML = '';
+  }
+  document.getElementById('tijd-invoer')?.remove();
 
   if (data.klok_invoer === 'keuze') {
     let clockChoice = document.getElementById('klok-keuze');
@@ -298,9 +310,73 @@ function setupClock(data) {
   } else {
     const existing = document.getElementById('klok-keuze');
     if (existing) existing.innerHTML = '';
+    setupTimeInput(el.clockZone);
     showZone('clock');
-    showNumpad(true, 'Typ het uur (1–12)');
+    showNumpad(true, data.hint || '');
   }
+}
+
+/* Digital time input: an hour box and a minutes box, filled with the numpad */
+function setupTimeInput(container) {
+  state.time = { h: '', m: '', active: 'h' };
+  container.insertAdjacentHTML('beforeend',
+      `<div id="tijd-invoer" class="tijd-invoer">`
+    + `<button type="button" class="tijd-deel" data-deel="h" aria-label="Uur"></button>`
+    + `<span class="tijd-dubbelpunt">:</span>`
+    + `<button type="button" class="tijd-deel" data-deel="m" aria-label="Minuten"></button>`
+    + `</div>`);
+  container.querySelectorAll('.tijd-deel').forEach(btn => {
+    btn.addEventListener('click', () => selectTimePart(btn.dataset.deel));
+  });
+}
+
+function selectTimePart(part) {
+  if (state.locked || !state.time) return;
+  state.time.active = part;
+  updateNumpad();
+}
+
+function timeDigit(d) {
+  const t = state.time;
+  if (t.active === 'h') {
+    if (t.h === '' || t.h === '0') {
+      t.h = d;
+      if (d >= '2') t.active = 'm';                // 2–9: hour is complete
+    } else if (t.h === '1' && d <= '2') {
+      t.h += d;                                    // 10, 11, 12
+      t.active = 'm';
+    } else {
+      t.active = 'm';                              // "1" then 3–9: start of the minutes
+      t.m = d;
+    }
+  } else if (t.m.length < 2) {
+    t.m += d;
+  }
+}
+
+function timeDelete() {
+  const t = state.time;
+  if (t.active === 'm' && t.m !== '') { t.m = t.m.slice(0, -1); return; }
+  t.active = 'h';
+  t.h = t.h.slice(0, -1);
+}
+
+function timeAnswer() {
+  const t = state.time;
+  return t.h !== '' && t.m.length === 2 ? `${parseInt(t.h, 10)}:${t.m}` : '';
+}
+
+function renderTime() {
+  const box = document.getElementById('tijd-invoer');
+  if (!box) return;
+  const [hEl, mEl] = box.querySelectorAll('.tijd-deel');
+  const t = state.time;
+  hEl.textContent = t.h || '?';
+  mEl.textContent = t.m.padEnd(2, '?');
+  hEl.classList.toggle('leeg', t.h === '');
+  mEl.classList.toggle('leeg', t.m.length < 2);
+  hEl.classList.toggle('actief', !state.locked && t.active === 'h');
+  mEl.classList.toggle('actief', !state.locked && t.active === 'm');
 }
 
 function setupNumberSnake(data) {
@@ -386,6 +462,12 @@ function resetNumpad(hint = '') {
 }
 
 function updateNumpad() {
+  if (state.time) {
+    renderTime();
+    el.numpadDisplay.classList.add('verborgen');
+    el.npOk.disabled = timeAnswer() === '';
+    return;
+  }
   const val  = state.numVal;
   const live = liveTargets();
   live.forEach(t => {
@@ -399,13 +481,16 @@ function updateNumpad() {
 }
 
 function addDigit(d) {
-  if (state.locked || state.numVal.length >= 3) return;
+  if (state.locked) return;
+  if (state.time) { timeDigit(d); updateNumpad(); return; }
+  if (state.numVal.length >= 3) return;
   state.numVal += d;
   updateNumpad();
 }
 
 function deleteDigit() {
   if (state.locked) return;
+  if (state.time) { timeDelete(); updateNumpad(); return; }
   state.numVal = state.numVal.slice(0, -1);
   updateNumpad();
 }
@@ -447,7 +532,7 @@ async function submit() {
   } catch (e) {
     state.locked = false;
     el.submitBtn.disabled = false;
-    el.npOk.disabled = state.numVal === '';
+    updateNumpad();
   }
 }
 
@@ -456,7 +541,7 @@ function getAnswer() {
     case 'invul':      return state.numVal;
     case 'keuze':      return state.currentAnswer;
     case 'klok':
-      return state.currentAnswer !== null ? state.currentAnswer : state.numVal;
+      return state.time ? timeAnswer() : state.currentAnswer;
     case 'rekenslang': return state.numVal;
     case 'ordenen':
       return state.orderingChosen.map(i => state.orderingPool[i]).join(',');
@@ -468,6 +553,17 @@ function getAnswer() {
 
 // Show the result inside the exercise itself: the right answer is always visible afterwards.
 function markAnswer(data) {
+  const timeBox = document.getElementById('tijd-invoer');
+  if (state.time && timeBox) {
+    renderTime();
+    if (!data.correct) {
+      const [h, m] = String(data.correct_antwoord).split(':');
+      const parts  = timeBox.querySelectorAll('.tijd-deel');
+      parts[0].textContent = h;
+      parts[1].textContent = m;
+    }
+    timeBox.classList.add(data.correct ? 'goed' : 'juist-getoond');
+  }
   liveTargets().forEach(t => {
     t.classList.remove('leeg');
     if (data.correct) { t.classList.add('goed'); return; }
