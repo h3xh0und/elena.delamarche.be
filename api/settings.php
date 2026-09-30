@@ -40,12 +40,12 @@ if ($action === 'max_number') {
     $newPin = $_POST['new_pin'] ?? '';
     $repeat = $_POST['repeat']  ?? '';
 
-    if (!preg_match('/^\d{4}$/', $oldPin)) {
-        echo json_encode(['ok' => false, 'fout' => 'Vul je huidige pincode in (4 cijfers).']);
+    if (!preg_match('/^\d{6,12}$/', $oldPin)) {
+        echo json_encode(['ok' => false, 'fout' => 'Vul je huidige pincode in (6-12 cijfers).']);
         exit;
     }
-    if (!preg_match('/^\d{4}$/', $newPin)) {
-        echo json_encode(['ok' => false, 'fout' => 'Nieuwe pincode moet 4 cijfers zijn.']);
+    if (!preg_match('/^\d{6,12}$/', $newPin)) {
+        echo json_encode(['ok' => false, 'fout' => 'Nieuwe pincode moet 6 tot 12 cijfers zijn.']);
         exit;
     }
     if ($newPin !== $repeat) {
