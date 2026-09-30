@@ -4,6 +4,11 @@ define('USERS_DIR',    DATA_DIR . '/users');
 define('PROGRESS_DIR', DATA_DIR . '/progress');
 define('RATELIMIT_DIR', DATA_DIR . '/ratelimit');
 
+/* URL of a static file with its mtime as cache-buster */
+function asset(string $path): string {
+    return $path . '?v=' . (@filemtime(__DIR__ . '/../' . $path) ?: '1');
+}
+
 $CATEGORIES = [
     'arithmetic' => [
         'name'      => 'Rekenen',
@@ -13,6 +18,7 @@ $CATEGORIES = [
             'addition'      => ['name' => 'Optellen',          'emoji' => '➕'],
             'subtraction'   => ['name' => 'Aftrekken',         'emoji' => '➖'],
             'mixed'         => ['name' => 'Gemengd',           'emoji' => '🔄'],
+            'times_tables'  => ['name' => 'Maaltafels',        'emoji' => '✖️'],
             'three_numbers' => ['name' => 'Drie getallen',     'emoji' => '3️⃣'],
             'splitting'     => ['name' => 'Splitsen',          'emoji' => '✂️'],
             'missing'       => ['name' => 'Ontbrekend getal',  'emoji' => '❓'],

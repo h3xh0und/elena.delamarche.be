@@ -6,12 +6,12 @@ The UI is entirely in Dutch.
 
 ## Features
 
-- **Arithmetic**: addition, subtraction, mixed, three numbers, splitting, missing number, commutative sums, halves, comparing, ordering, counting & neighbours, jumps, clock reading, money, number snake
+- **Arithmetic**: addition, subtraction, mixed, times tables, three numbers, splitting, missing number, commutative sums, halves, comparing, ordering, counting & neighbours, jumps, clock reading, money, number snake
 - **Word problems**: context-based arithmetic
 - **Logical thinking**: more/less, reading pictograms/tables
 - **Speed test**: answer as many sums as possible in 2 minutes (with highscore)
 - **Progress tracking** per child (stars, progress bar, correct/total)
-- **Per-child settings**: max number, clock difficulty, jump step size
+- **Per-child settings**: max number, highest times table, clock difficulty, jump step size
 
 ## Requirements
 
@@ -63,7 +63,6 @@ The UI is entirely in Dutch.
 │   ├── flatfile.php        # Flat-file storage (users, progress, rate limiting)
 │   └── exercises/
 │       ├── arithmetic.php
-│       ├── language.php
 │       └── logical.php
 ├── data/                   # Runtime data (gitignored)
 │   ├── users/

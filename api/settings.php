@@ -76,6 +76,14 @@ if ($action === 'max_number') {
     $highscore = readSpeedtestHighscore($user);
     echo json_encode(['ok' => true, 'new_record' => $newRecord, 'highscore' => $highscore]);
 
+} elseif ($action === 'tables_max') {
+    $max = (int)($_POST['tables_max'] ?? 5);
+    if (!saveTablesMax($user, $max)) {
+        echo json_encode(['ok' => false, 'fout' => 'Ongeldige waarde']);
+        exit;
+    }
+    echo json_encode(['ok' => true, 'bericht' => 'Instelling opgeslagen!']);
+
 } elseif ($action === 'jump_step') {
     $step = (int)($_POST['jump_step'] ?? 2);
     if (!saveJumpStep($user, $step)) {

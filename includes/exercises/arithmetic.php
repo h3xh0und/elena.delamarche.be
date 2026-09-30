@@ -1,11 +1,12 @@
 <?php
 
-function generateArithmeticExercise(string $type, int $maxNumber = 20, string $clockLevel = 'hour', int $jumpStep = 2): array {
+function generateArithmeticExercise(string $type, int $maxNumber = 20, string $clockLevel = 'hour', int $jumpStep = 2, int $tablesMax = 5): array {
     $mx = max(10, $maxNumber);
     return match ($type) {
         'addition'      => rAddition($mx),
         'subtraction'   => rSubtraction($mx),
         'mixed'         => rMixed($mx),
+        'times_tables'  => rTimesTables($tablesMax),
         'three_numbers' => rThreeNumbers($mx),
         'neighbours'    => rCountingNeighbours($mx),
         'splitting'     => rSplitting($mx),
@@ -51,6 +52,17 @@ function rSubtraction(int $max): array {
 
 function rMixed(int $max = 20): array {
     return rand(0, 1) ? rAddition($max) : rSubtraction($max);
+}
+
+function rTimesTables(int $maxTable = 5): array {
+    $table = rand(1, max(1, min(10, $maxTable)));
+    $n     = rand(1, 10);
+    return [
+        'type'     => 'invul',
+        'vraag'    => "$n × $table = ?",
+        'antwoord' => (string)($n * $table),
+        'invoer'   => 'getal',
+    ];
 }
 
 function rThreeNumbers(int $max = 20): array {
@@ -102,12 +114,17 @@ function rSplitting(int $max = 20): array {
     $n = rand(3, $max);
     $a = rand(1, $n - 1);
     $b = $n - $a;
-    if (rand(0, 1)) {
-        return ['type' => 'invul', 'vraag' => "$n = $a + ?",
-                'antwoord' => (string)$b, 'invoer' => 'getal'];
-    }
-    return ['type' => 'invul', 'vraag' => "$n = ? + $b",
-            'antwoord' => (string)$a, 'invoer' => 'getal'];
+    $leftMissing = (bool)rand(0, 1);
+    return [
+        'type'     => 'splitsing',
+        'label'    => 'Splits het getal:',
+        'vraag'    => '',
+        'boven'    => $n,
+        'links'    => $leftMissing ? '?' : $a,
+        'rechts'   => $leftMissing ? $b : '?',
+        'antwoord' => (string)($leftMissing ? $a : $b),
+        'invoer'   => 'getal',
+    ];
 }
 
 function rHalf(int $max = 20): array {

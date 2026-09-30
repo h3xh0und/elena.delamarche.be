@@ -30,23 +30,20 @@ $csrf     = csrfToken();
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E9">
 <title><?= $catName ?> – Oefenwebsite</title>
-<link rel="stylesheet" href="assets/css/fonts.css">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 <meta name="csrf-token" content="<?= $csrf ?>">
 </head>
 <body class="oefening-pagina kleur-<?= $catColor ?>">
 
 <header class="oef-header">
-    <a href="dashboard.php" class="terug-knop" aria-label="Terug naar dashboard">←</a>
-    <div class="oef-header-midden">
-        <span class="oef-header-emoji"><?= $catEmoji ?></span>
-        <span class="oef-header-naam"><?= $catName ?></span>
-    </div>
-    <div class="score-teller">
-        <span id="score-correct">0</span>/<span id="score-totaal">0</span>
-    </div>
+    <a href="dashboard.php" class="terug-knop" aria-label="Terug naar alle oefeningen">🏠</a>
+    <div id="ronde-balk" class="ronde-balk" role="img" aria-label="Voortgang van deze ronde"></div>
+    <div id="score-teller" class="score-teller" aria-label="Aantal juist">⭐ <span id="score-correct">0</span></div>
+    <button type="button" id="geluid-knop" class="geluid-knop" aria-label="Geluid aan of uit">🔇</button>
 </header>
 
 <main class="oefening-main">
@@ -55,7 +52,7 @@ $csrf     = csrfToken();
     <div id="oefening-kaart" class="oefening-kaart verborgen">
 
         <div class="oef-inhoud">
-            <div id="oef-label" class="oef-vraag-label"></div>
+            <div id="oef-label" class="oef-vraag-label" data-naam="<?= $catEmoji ?> <?= $catName ?>"></div>
             <div id="oef-vraag" class="oef-vraag-tekst"></div>
             <div id="oef-extra" class="oef-extra"></div>
 
@@ -106,9 +103,21 @@ $csrf     = csrfToken();
 
     </div>
 
-    <div id="feedback" class="feedback verborgen">
+    <div id="ronde-klaar" class="oefening-kaart ronde-klaar verborgen">
+        <div id="ronde-emoji" class="ronde-emoji">🏆</div>
+        <div id="ronde-titel" class="ronde-titel">Klaar!</div>
+        <div id="ronde-sterren" class="ronde-sterren" aria-hidden="true"></div>
+        <div class="ronde-score"><strong id="ronde-correct">0</strong> van de <span id="ronde-totaal">10</span> juist</div>
+        <div class="ronde-knoppen">
+            <button type="button" id="ronde-opnieuw" class="btn btn-groen btn-groot">🔁 Nog een keer</button>
+            <a href="dashboard.php" class="btn btn-primair btn-groot">🏠 Iets anders</a>
+        </div>
+    </div>
+
+    <div id="feedback" class="feedback verborgen" role="status" aria-live="polite">
         <div id="feedback-icoon" class="feedback-icoon"></div>
         <div id="feedback-bericht" class="feedback-bericht"></div>
+        <button type="button" id="feedback-verder" class="btn btn-primair btn-groot">Verder →</button>
     </div>
 </main>
 
@@ -116,7 +125,7 @@ $csrf     = csrfToken();
     const CATEGORIE = <?= json_encode($cat) ?>;
     const CSRF      = <?= json_encode($csrf) ?>;
 </script>
-<script src="assets/js/app.js?v=2"></script>
+<script src="<?= asset('assets/js/app.js') ?>"></script>
 
 </body>
 </html>

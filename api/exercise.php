@@ -37,11 +37,12 @@ try {
     $maxNumber  = readMaxNumber($user);
     $clockLevel = readClockLevel($user);
     $jumpStep   = readJumpStep($user);
+    $tablesMax  = readTablesMax($user);
 
     if ($cat === 'speedtest') {
         $exercise = rSpeedTest($maxNumber);
     } elseif (in_array($cat, $arithmeticTypes)) {
-        $exercise = generateArithmeticExercise($cat, $maxNumber, $clockLevel, $jumpStep);
+        $exercise = generateArithmeticExercise($cat, $maxNumber, $clockLevel, $jumpStep, $tablesMax);
     } elseif ($cat === 'word_problems') {
         $exercise = rWordProblems($maxNumber);
     } elseif ($cat === 'more_less') {

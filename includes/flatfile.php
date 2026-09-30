@@ -135,6 +135,19 @@ function saveJumpStep(string $name, int $step): bool {
     return _writeJson(_userPath($name), $data);
 }
 
+function readTablesMax(string $name): int {
+    $data = _readJson(_userPath($name));
+    return (int)($data['tables_max'] ?? 5);
+}
+
+function saveTablesMax(string $name, int $max): bool {
+    if ($max < 2 || $max > 10) return false;
+    $data = _readJson(_userPath($name));
+    if (!$data) return false;
+    $data['tables_max'] = $max;
+    return _writeJson(_userPath($name), $data);
+}
+
 /* Maps legacy Dutch exercise keys to English (for progress data migration) */
 const EXERCISE_KEY_MAP = [
     'optellen'      => 'addition',

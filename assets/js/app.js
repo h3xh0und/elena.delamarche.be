@@ -1,5 +1,7 @@
 'use strict';
 
+const ROUND_LENGTH = 10;
+
 /* ── State ─────────────────────────────────────────────── */
 const state = {
   currentType:    null,
@@ -7,8 +9,10 @@ const state = {
   numVal:         '',     // current numeric input (numpad)
   orderingPool:   [],     // remaining numbers for ordering
   orderingChosen: [],     // chosen numbers for ordering
-  scoreCorrect:   0,
-  scoreTotal:     0,
+  round:          [],     // true/false per answered exercise in this round
+  locked:         false,  // input blocked while checking / showing feedback
+  waiting:        false,  // feedback shown, waiting for "Verder"
+  sound:          false,
 };
 
 /* ── DOM refs ──────────────────────────────────────────── */
@@ -21,8 +25,18 @@ const el = {
   feedback:       document.getElementById('feedback'),
   fbIcon:         document.getElementById('feedback-icoon'),
   fbMessage:      document.getElementById('feedback-bericht'),
+  fbNext:         document.getElementById('feedback-verder'),
+  scoreCounter:   document.getElementById('score-teller'),
   scoreCorrect:   document.getElementById('score-correct'),
-  scoreTotal:     document.getElementById('score-totaal'),
+  roundBar:       document.getElementById('ronde-balk'),
+  roundDone:      document.getElementById('ronde-klaar'),
+  roundEmoji:     document.getElementById('ronde-emoji'),
+  roundTitle:     document.getElementById('ronde-titel'),
+  roundStars:     document.getElementById('ronde-sterren'),
+  roundCorrect:   document.getElementById('ronde-correct'),
+  roundTotal:     document.getElementById('ronde-totaal'),
+  roundAgain:     document.getElementById('ronde-opnieuw'),
+  soundBtn:       document.getElementById('geluid-knop'),
   submitBtn:      document.getElementById('indienen-knop'),
   // zones
   fillZone:       document.getElementById('invul-zone'),
@@ -45,10 +59,15 @@ const el = {
 
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  initSound();
+  renderRoundBar();
   loadNextExercise();
+
   el.submitBtn.addEventListener('click', submit);
   el.npOk.addEventListener('click', submit);
   el.orderingReset.addEventListener('click', resetOrdering);
+  el.fbNext.addEventListener('click', next);
+  el.roundAgain.addEventListener('click', startRound);
 
   document.getElementById('np-wis').addEventListener('click', deleteDigit);
   document.querySelectorAll('.np-btn[data-n]').forEach(btn => {
@@ -57,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
+      if (state.waiting) { next(); return; }
+      if (!el.roundDone.classList.contains('verborgen')) { startRound(); return; }
       if (!el.numpad.classList.contains('verborgen') && !el.npOk.disabled) { submit(); return; }
       if (!el.submitBtn.disabled) submit();
       return;
@@ -67,10 +89,46 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+/* ── Round (10 exercises) ──────────────────────────────── */
+function startRound() {
+  state.round = [];
+  el.scoreCorrect.textContent = 0;
+  el.roundDone.classList.add('verborgen');
+  renderRoundBar();
+  loadNextExercise();
+}
+
+function renderRoundBar() {
+  el.roundBar.innerHTML = '';
+  for (let i = 0; i < ROUND_LENGTH; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'ronde-stip';
+    if (i < state.round.length)        dot.classList.add(state.round[i] ? 'goed' : 'fout');
+    else if (i === state.round.length) dot.classList.add('huidig');
+    el.roundBar.appendChild(dot);
+  }
+}
+
+function showRoundEnd() {
+  const correct = state.round.filter(Boolean).length;
+  const stars   = correct >= 9 ? 3 : correct >= 6 ? 2 : 1;
+
+  el.card.classList.add('verborgen');
+  el.roundEmoji.textContent   = stars === 3 ? '🏆' : stars === 2 ? '🎉' : '💪';
+  el.roundTitle.textContent   = stars === 3 ? 'Fantastisch!' : stars === 2 ? 'Goed gedaan!' : 'Goed geoefend!';
+  el.roundStars.innerHTML     = '<span class="vol">★</span>'.repeat(stars) + '★'.repeat(3 - stars);
+  el.roundCorrect.textContent = correct;
+  el.roundTotal.textContent   = ROUND_LENGTH;
+  el.roundDone.classList.remove('verborgen');
+  el.roundAgain.focus({ preventScroll: true });
+
+  play('round');
+  confetti(24);
+}
+
 /* ── Load exercise ─────────────────────────────────────── */
 async function loadNextExercise() {
   showLoading(true);
-  hideAllZones();
 
   try {
     const res  = await fetch(`api/exercise.php?cat=${encodeURIComponent(CATEGORIE)}`);
@@ -85,20 +143,27 @@ async function loadNextExercise() {
 function showExercise(data) {
   state.currentType   = data.type;
   state.currentAnswer = null;
+  state.locked        = false;
 
-  el.label.textContent = data.label  || '';
+  hideAllZones();
+  el.label.textContent = data.label || el.label.dataset.naam || '';
   el.extra.innerHTML   = '';
   el.question.classList.remove('lang-vraag');
 
   const questionText = data.vraag || '';
+  // A stand-alone "?" is the blank to fill in: show the typed answer right there.
+  const blank = /(^|\s)\?(?=\s|$)/;
 
-  if (data.type === 'keuze' && questionText && isNaN(questionText)) {
-    el.question.innerHTML = `<span class="taal-woord-display">${esc(questionText)}</span>`;
+  if (data.type === 'invul' && blank.test(questionText)) {
+    el.question.innerHTML = esc(questionText)
+      .replace(blank, '$1<span class="antwoord-vak antwoord-live leeg">?</span>');
+  } else if (data.type === 'keuze' && questionText && isNaN(questionText)) {
+    el.question.innerHTML = `<span class="keuze-vraag-display">${esc(questionText)}</span>`;
   } else {
     el.question.textContent = questionText;
   }
 
-  if (questionText.length > 40) el.question.classList.add('lang-vraag');
+  if (questionText.length > 22) el.question.classList.add('lang-vraag');
 
   switch (data.type) {
     case 'invul':      setupFill(data);        break;
@@ -106,6 +171,7 @@ function showExercise(data) {
     case 'ordenen':    setupOrdering(data);    break;
     case 'klok':       setupClock(data);       break;
     case 'rekenslang': setupNumberSnake(data); break;
+    case 'splitsing':  setupSplitting(data);   break;
     case 'pictogram':  setupPictogram(data);   break;
     default:           setupFill(data);
   }
@@ -126,9 +192,11 @@ function setupChoice(data) {
   state.currentAnswer = null;
   (data.opties || []).forEach(opt => {
     const btn = document.createElement('button');
+    btn.type        = 'button';
     btn.className   = 'keuze-knop';
     btn.textContent = opt;
     btn.addEventListener('click', () => {
+      if (state.locked) return;
       document.querySelectorAll('.keuze-knop').forEach(b => b.classList.remove('geselecteerd'));
       btn.classList.add('geselecteerd');
       state.currentAnswer = opt;
@@ -154,12 +222,13 @@ function renderOrdering() {
 
   state.orderingPool.forEach((n, i) => {
     const btn = document.createElement('button');
+    btn.type        = 'button';
     btn.className   = 'getal-chip';
     btn.textContent = n;
     btn.dataset.idx = i;
     if (state.orderingChosen.includes(i)) btn.classList.add('gebruikt');
     btn.addEventListener('click', () => {
-      if (btn.classList.contains('gebruikt')) return;
+      if (state.locked || btn.classList.contains('gebruikt')) return;
       btn.classList.add('gebruikt');
       state.orderingChosen.push(i);
       addAnswerChip(n, i);
@@ -174,11 +243,13 @@ function renderOrdering() {
 }
 
 function addAnswerChip(n, idx) {
-  const chip = document.createElement('div');
+  const chip = document.createElement('button');
+  chip.type        = 'button';
   chip.className   = 'antwoord-chip';
   chip.textContent = n;
-  chip.title       = 'Tik om te verwijderen';
+  chip.title       = 'Tik om terug te leggen';
   chip.addEventListener('click', () => {
+    if (state.locked) return;
     const pos = state.orderingChosen.indexOf(idx);
     if (pos !== -1) state.orderingChosen.splice(pos, 1);
     renderOrdering();
@@ -188,6 +259,7 @@ function addAnswerChip(n, idx) {
 }
 
 function resetOrdering() {
+  if (state.locked) return;
   state.orderingChosen = [];
   renderOrdering();
   el.submitBtn.disabled = true;
@@ -208,9 +280,11 @@ function setupClock(data) {
     state.currentAnswer = null;
     (data.opties || []).forEach(opt => {
       const btn = document.createElement('button');
+      btn.type        = 'button';
       btn.className   = 'keuze-knop';
       btn.textContent = opt;
       btn.addEventListener('click', () => {
+        if (state.locked) return;
         clockChoice.querySelectorAll('.keuze-knop').forEach(b => b.classList.remove('geselecteerd'));
         btn.classList.add('geselecteerd');
         state.currentAnswer = opt;
@@ -244,13 +318,31 @@ function setupNumberSnake(data) {
     el.numberSnakeChain.appendChild(stepEl);
 
     const toEl = document.createElement('div');
-    toEl.className   = 'rsl-getal' + (step.naar === '?' ? ' ontbreekt' : '');
+    toEl.className   = 'rsl-getal' + (step.naar === '?' ? ' ontbreekt antwoord-live' : '');
     toEl.textContent = step.naar;
     el.numberSnakeChain.appendChild(toEl);
   });
 
   showZone('numberSnake');
   showNumpad(true);
+}
+
+function setupSplitting(data) {
+  const corner = (cls, x, y, val) => {
+    const missing = val === '?';
+    return `<g class="spl-hoek ${cls}${missing ? ' ontbreekt' : ''}">`
+         + `<circle cx="${x}" cy="${y}" r="34"/>`
+         + `<text x="${x}" y="${y}"${missing ? ' class="antwoord-live"' : ''}>${esc(val)}</text></g>`;
+  };
+  el.extra.innerHTML =
+      `<svg viewBox="0 0 220 190" class="splits-driehoek" aria-label="Splitsing">`
+    + `<polygon class="spl-lijn" points="110,40 45,150 175,150"/>`
+    + corner('boven', 110, 40, data.boven)
+    + corner('onder', 45, 150, data.links)
+    + corner('onder', 175, 150, data.rechts)
+    + `</svg>`;
+  state.currentType = 'invul';
+  setupFill(data);
 }
 
 function setupPictogram(data) {
@@ -275,6 +367,12 @@ function renderPictogram(data) {
 }
 
 /* ── Numpad ────────────────────────────────────────────── */
+
+// Places in the question itself (blank box, snake cell, triangle corner) that mirror the typed answer.
+function liveTargets() {
+  return el.card.querySelectorAll('.antwoord-live');
+}
+
 function showNumpad(visible, hint = '') {
   el.numpad.classList.toggle('verborgen', !visible);
   el.submitBtn.classList.toggle('verborgen', visible);
@@ -288,28 +386,37 @@ function resetNumpad(hint = '') {
 }
 
 function updateNumpad() {
-  const val = state.numVal;
+  const val  = state.numVal;
+  const live = liveTargets();
+  live.forEach(t => {
+    t.textContent = val || '?';
+    t.classList.toggle('leeg', val === '');
+  });
+  el.numpadDisplay.classList.toggle('verborgen', live.length > 0);
   el.numpadDisplay.textContent = val || '?';
   el.numpadDisplay.classList.toggle('leeg', val === '');
   el.npOk.disabled = val === '';
 }
 
 function addDigit(d) {
-  if (state.numVal.length >= 3) return;
+  if (state.locked || state.numVal.length >= 3) return;
   state.numVal += d;
   updateNumpad();
 }
 
 function deleteDigit() {
+  if (state.locked) return;
   state.numVal = state.numVal.slice(0, -1);
   updateNumpad();
 }
 
 /* ── Submit answer ─────────────────────────────────────── */
 async function submit() {
+  if (state.locked) return;
   const answer = getAnswer();
   if (answer === null || answer === '') return;
 
+  state.locked = true;
   el.submitBtn.disabled = true;
   el.npOk.disabled = true;
 
@@ -323,16 +430,24 @@ async function submit() {
       body: fd,
     });
     const data = await res.json();
+    if (data.fout) throw new Error(data.fout);
 
-    state.scoreTotal++;
-    if (data.correct) state.scoreCorrect++;
-    el.scoreCorrect.textContent = state.scoreCorrect;
-    el.scoreTotal.textContent   = state.scoreTotal;
+    state.round.push(!!data.correct);
+    renderRoundBar();
+    if (data.correct) {
+      el.scoreCorrect.textContent = state.round.filter(Boolean).length;
+      el.scoreCounter.classList.remove('plop');
+      void el.scoreCounter.offsetWidth;
+      el.scoreCounter.classList.add('plop');
+    }
 
+    markAnswer(data);
     showFeedback(data.correct, data.bericht);
 
   } catch (e) {
+    state.locked = false;
     el.submitBtn.disabled = false;
+    el.npOk.disabled = state.numVal === '';
   }
 }
 
@@ -350,25 +465,119 @@ function getAnswer() {
 }
 
 /* ── Feedback ──────────────────────────────────────────── */
+
+// Show the result inside the exercise itself: the right answer is always visible afterwards.
+function markAnswer(data) {
+  liveTargets().forEach(t => {
+    t.classList.remove('leeg');
+    if (data.correct) { t.classList.add('goed'); return; }
+    t.textContent = data.correct_antwoord;
+    t.classList.add('juist-getoond');
+  });
+  el.card.querySelectorAll('.keuze-knop').forEach(b => {
+    if (b.textContent === String(data.correct_antwoord)) b.classList.add('juist');
+    else if (b.classList.contains('geselecteerd'))       b.classList.add('mis');
+  });
+}
+
 function showFeedback(correct, message) {
   el.feedback.className = 'feedback ' + (correct ? 'correct' : 'incorrect');
-  el.fbIcon.textContent    = correct ? '🎉' : '😬';
+  el.fbIcon.textContent    = correct ? '🎉' : '🤔';
   el.fbMessage.textContent = message;
-
   el.feedback.classList.remove('verborgen');
 
-  const delay = correct ? 1400 : 2400;
-  setTimeout(() => {
-    el.feedback.classList.add('verborgen');
-    loadNextExercise();
-  }, delay);
+  play(correct ? 'good' : 'wrong');
+  if (navigator.vibrate) navigator.vibrate(correct ? 40 : [30, 60, 30]);
+
+  if (correct) {
+    confetti(12);
+    setTimeout(next, 1200);
+  } else {
+    // No timer on mistakes: the child reads the right answer and continues when ready.
+    state.waiting = true;
+    el.fbNext.focus({ preventScroll: true });
+  }
+}
+
+function next() {
+  state.waiting = false;
+  el.feedback.classList.add('verborgen');
+  if (state.round.length >= ROUND_LENGTH) showRoundEnd();
+  else loadNextExercise();
+}
+
+function confetti(count) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = document.createElement('div');
+  box.className = 'confetti';
+  const icons = ['⭐', '🌟', '✨', '🎉', '💛'];
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('span');
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 120 + Math.random() * 220;
+    s.textContent = icons[i % icons.length];
+    s.style.setProperty('--dx',  `${Math.cos(angle) * dist}px`);
+    s.style.setProperty('--dy',  `${Math.sin(angle) * dist}px`);
+    s.style.setProperty('--rot', `${(Math.random() - .5) * 540}deg`);
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 1000);
+}
+
+/* ── Sound (generated, no audio files) ─────────────────── */
+let audioCtx = null;
+
+function initSound() {
+  try { state.sound = localStorage.getItem('geluid') === 'aan'; } catch (e) {}
+  updateSoundBtn();
+  el.soundBtn.addEventListener('click', () => {
+    state.sound = !state.sound;
+    try { localStorage.setItem('geluid', state.sound ? 'aan' : 'uit'); } catch (e) {}
+    updateSoundBtn();
+    play('good');
+  });
+}
+
+function updateSoundBtn() {
+  el.soundBtn.textContent = state.sound ? '🔊' : '🔇';
+  el.soundBtn.setAttribute('aria-pressed', state.sound ? 'true' : 'false');
+}
+
+function play(kind) {
+  if (!state.sound) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  try {
+    audioCtx = audioCtx || new Ctx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const notes = {
+      good:  [[660, 0], [880, .1]],
+      wrong: [[300, 0], [250, .14]],
+      round: [[523, 0], [659, .12], [784, .24], [1047, .36]],
+    }[kind];
+    notes.forEach(([freq, at]) => {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const t    = audioCtx.currentTime + at;
+      osc.type = kind === 'wrong' ? 'sine' : 'triangle';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(.0001, t);
+      gain.gain.exponentialRampToValueAtTime(.25, t + .02);
+      gain.gain.exponentialRampToValueAtTime(.0001, t + .22);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + .25);
+    });
+  } catch (e) {}
 }
 
 /* ── Helpers ───────────────────────────────────────────── */
 function showLoading(visible, text) {
-  el.loading.textContent  = text || 'Even laden...';
-  el.loading.style.display = visible ? 'block' : 'none';
-  el.card.classList.toggle('verborgen', visible);
+  el.loading.textContent  = text || '';
+  el.loading.style.display = visible && text ? 'block' : 'none';
+  // Keep the previous card in place while the next one loads, so the screen doesn't flash.
+  if (!visible || text) el.card.classList.toggle('verborgen', visible);
 }
 
 function hideAllZones() {

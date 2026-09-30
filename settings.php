@@ -8,6 +8,7 @@ $user       = currentUser();
 $maxNumber  = readMaxNumber($user);
 $clockLevel = readClockLevel($user);
 $jumpStep   = readJumpStep($user);
+$tablesMax  = readTablesMax($user);
 $csrf       = csrfToken();
 
 $clockLevels = [
@@ -22,19 +23,20 @@ $clockLevels = [
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E9">
 <title>Instellingen – Oefenwebsite</title>
-<link rel="stylesheet" href="assets/css/fonts.css">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 <meta name="csrf-token" content="<?= $csrf ?>">
 </head>
 <body class="site-page">
 
 <header class="site-header">
     <div class="header-inhoud">
-        <a href="dashboard.php" class="terug-link" style="font-weight:800">← Dashboard</a>
-        <span style="font-weight:800">⚙️ Instellingen</span>
-        <a href="logout.php" class="btn btn-klein btn-uitlog">Uitloggen</a>
+        <a href="dashboard.php" class="terug-knop" aria-label="Terug naar alle oefeningen">🏠</a>
+        <span class="header-titel">⚙️ Instellingen</span>
+        <a href="logout.php" class="btn btn-klein btn-uitlog">Stoppen 👋</a>
     </div>
 </header>
 
@@ -44,9 +46,9 @@ $clockLevels = [
 
     <!-- Max getal -->
     <div class="inst-kaart">
-        <h2 class="inst-titel">🔢 Tot welk getal oefenen?</h2>
+        <h2 class="inst-titel">➕➖ Optellen en aftrekken — tot welk getal?</h2>
         <p class="inst-omschrijving">
-            Kies hoe groot de getallen mogen zijn in de rekenoefeningen.
+            Kies hoe groot de getallen mogen zijn bij optellen, aftrekken en de andere rekenoefeningen.
         </p>
         <div class="getal-knoppen" id="getal-knoppen">
             <?php foreach ([10, 20, 30, 50, 100] as $opt): ?>
@@ -57,6 +59,25 @@ $clockLevels = [
             <?php endforeach; ?>
         </div>
         <button class="btn btn-primair" id="sla-max-op" style="margin-top:1rem">
+            Opslaan
+        </button>
+    </div>
+
+    <!-- Maaltafels -->
+    <div class="inst-kaart">
+        <h2 class="inst-titel">✖️ Maaltafels — tot welke tafel?</h2>
+        <p class="inst-omschrijving">
+            Kies tot welke maaltafel er geoefend wordt. "tot 5" oefent de tafels van 1 tot en met 5.
+        </p>
+        <div class="getal-knoppen" id="tafels-knoppen">
+            <?php foreach (range(2, 10) as $opt): ?>
+            <button class="getal-keuze-knop <?= $opt === $tablesMax ? 'actief' : '' ?>"
+                    data-tafel="<?= $opt ?>">
+                tot <?= $opt ?>
+            </button>
+            <?php endforeach; ?>
+        </div>
+        <button class="btn btn-primair" id="sla-tafels-op" style="margin-top:1rem">
             Opslaan
         </button>
     </div>
@@ -129,9 +150,9 @@ const CSRF = <?= json_encode($csrf) ?>;
 // ── Max getal ────────────────────────────────────────────
 let selectedMax = <?= $maxNumber ?>;
 
-document.querySelectorAll('.getal-keuze-knop').forEach(btn => {
+document.querySelectorAll('#getal-knoppen .getal-keuze-knop').forEach(btn => {
     btn.addEventListener('click', () => {
-        document.querySelectorAll('.getal-keuze-knop').forEach(b => b.classList.remove('actief'));
+        document.querySelectorAll('#getal-knoppen .getal-keuze-knop').forEach(b => b.classList.remove('actief'));
         btn.classList.add('actief');
         selectedMax = parseInt(btn.dataset.waarde);
     });
@@ -141,6 +162,26 @@ document.getElementById('sla-max-op').addEventListener('click', async () => {
     const fd = new FormData();
     fd.append('action', 'max_number');
     fd.append('max_number', selectedMax);
+    const res  = await fetch('api/settings.php', { method:'POST', headers:{'X-CSRF-Token':CSRF}, body:fd });
+    const data = await res.json();
+    showMessage(data.ok, data.bericht || data.fout);
+});
+
+// ── Maaltafels ───────────────────────────────────────────
+let selectedTablesMax = <?= $tablesMax ?>;
+
+document.querySelectorAll('#tafels-knoppen .getal-keuze-knop').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#tafels-knoppen .getal-keuze-knop').forEach(b => b.classList.remove('actief'));
+        btn.classList.add('actief');
+        selectedTablesMax = parseInt(btn.dataset.tafel);
+    });
+});
+
+document.getElementById('sla-tafels-op').addEventListener('click', async () => {
+    const fd = new FormData();
+    fd.append('action',     'tables_max');
+    fd.append('tables_max', selectedTablesMax);
     const res  = await fetch('api/settings.php', { method:'POST', headers:{'X-CSRF-Token':CSRF}, body:fd });
     const data = await res.json();
     showMessage(data.ok, data.bericht || data.fout);

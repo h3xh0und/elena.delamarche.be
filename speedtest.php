@@ -12,15 +12,16 @@ $highscore = readSpeedtestHighscore($user);
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E9">
 <title>Sneltest – Oefenwebsite</title>
-<link rel="stylesheet" href="assets/css/fonts.css">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 </head>
 <body class="oefening-pagina kleur-oranje">
 
 <header class="oef-header">
-    <a href="dashboard.php" class="terug-knop" aria-label="Terug naar dashboard">←</a>
+    <a href="dashboard.php" class="terug-knop" aria-label="Terug naar alle oefeningen">🏠</a>
     <div class="oef-header-midden">
         <span class="oef-header-emoji">⚡</span>
         <span class="oef-header-naam">Sneltest</span>
@@ -31,8 +32,8 @@ $highscore = readSpeedtestHighscore($user);
 <main class="oefening-main">
 
     <!-- Startscherm -->
-    <div id="fase-start" class="oefening-kaart">
-        <div style="text-align:center;padding:.5rem 0">
+    <div id="fase-start" class="oefening-kaart kolom">
+        <div style="text-align:center;padding:.5rem 0;margin-top:auto">
             <div style="font-size:3.5rem;line-height:1;margin-bottom:.5rem">⚡</div>
             <div class="oef-vraag-tekst" style="font-size:2rem;margin-bottom:.5rem">Sneltest</div>
             <p style="color:var(--tekst-zacht);font-size:1.05rem;margin-bottom:1.25rem">
@@ -44,7 +45,7 @@ $highscore = readSpeedtestHighscore($user);
             </p>
             <?php endif; ?>
         </div>
-        <button id="start-knop" class="btn btn-primair btn-groot indienen-knop">Start!</button>
+        <button id="start-knop" class="btn btn-groen btn-groot indienen-knop" style="margin:0 auto auto">Start! ▶</button>
     </div>
 
     <!-- Actief -->
@@ -94,8 +95,8 @@ $highscore = readSpeedtestHighscore($user);
     </div><!-- /fase-bezig -->
 
     <!-- Eindscherm -->
-    <div id="fase-klaar" class="oefening-kaart verborgen">
-        <div style="text-align:center;padding:.5rem 0">
+    <div id="fase-klaar" class="oefening-kaart kolom verborgen">
+        <div style="text-align:center;padding:.5rem 0;margin-top:auto">
             <div id="eind-emoji" style="font-size:3.5rem;line-height:1;margin-bottom:.5rem">🏆</div>
             <div class="oef-vraag-tekst" style="font-size:2rem;margin-bottom:.75rem">Tijd is om!</div>
             <div style="font-size:3.5rem;font-weight:900;color:var(--primair)">
@@ -111,9 +112,9 @@ $highscore = readSpeedtestHighscore($user);
                 🎉 Nieuw record!
             </div>
         </div>
-        <div style="display:flex;gap:1rem;justify-content:center">
-            <button id="opnieuw-knop" class="btn btn-primair btn-groot indienen-knop" style="width:auto">Opnieuw ↺</button>
-            <a href="dashboard.php" class="btn btn-groot btn-uitlog" style="width:auto">Dashboard</a>
+        <div class="ronde-knoppen" style="margin-bottom:auto">
+            <button id="opnieuw-knop" class="btn btn-groen btn-groot">🔁 Nog een keer</button>
+            <a href="dashboard.php" class="btn btn-primair btn-groot">🏠 Iets anders</a>
         </div>
     </div>
 
@@ -163,6 +164,12 @@ function deleteDigit() {
     updateDisplay();
 }
 function updateDisplay() {
+    const live = document.getElementById('snel-live');
+    if (live) {
+        live.textContent = numVal || '?';
+        live.classList.toggle('leeg', numVal === '');
+    }
+    el.display.classList.toggle('verborgen', !!live);
     el.display.textContent = numVal || '?';
     el.display.classList.toggle('leeg', numVal === '');
     el.ok.disabled = numVal === '';
@@ -232,7 +239,10 @@ async function loadQuestion() {
 
         questionHistory.push(data.vraag);
         if (questionHistory.length > 12) questionHistory.shift();
-        el.question.textContent = data.vraag || '';
+        // Show the typed answer in place of the "?"
+        el.question.innerHTML = String(data.vraag || '')
+            .replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c])
+            .replace(/(^|\s)\?(?=\s|$)/, '$1<span id="snel-live" class="antwoord-vak leeg">?</span>');
         resetInput();
         el.flash.classList.add('verborgen');
     } catch (e) {}

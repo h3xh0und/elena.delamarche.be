@@ -3,10 +3,11 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E9">
 <title>Privacyverklaring – Oefenwebsite</title>
-<link rel="stylesheet" href="assets/css/fonts.css">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 </head>
 <body class="site-page">
 
@@ -23,7 +24,7 @@
     <div class="inst-kaart">
         <h2 class="inst-titel">Wat is deze website?</h2>
         <p class="inst-omschrijving">
-            Deze oefenwebsite laat kinderen uit het eerste leerjaar rekenen en taalleerstof oefenen.
+            Deze oefenwebsite laat kinderen uit het eerste leerjaar rekenen oefenen.
             Ze is gebouwd als een persoonlijk project en is volledig gratis en zonder reclame.
             De broncode is <a href="https://github.com/h3xh0und/elena.delamarche.be" target="_blank" rel="noopener noreferrer" style="color:var(--primair)">open source op GitHub</a>.
         </p>

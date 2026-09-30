@@ -23,6 +23,7 @@ jobs:
             **/.git*
             **/.git*/**
             **/.claude/**
+            **/CLAUDE.md
             **/data/users/**
             **/data/progress/**
             **/data/ratelimit/**
