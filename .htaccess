@@ -15,5 +15,7 @@ RewriteRule ^(includes|data|original_exercises|\.claude)(/|$) - [F,L]
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
     # The host advertises HTTP/3 but doesn't answer on it: browsers then hang on
     # the first click. "clear" tells them to forget HTTP/3 and stay on HTTP/2.
+    # NB: the host's front server currently overrides this header; HTTP/3 must be
+    # switched off (or fixed) at the hosting provider.
     Header always set Alt-Svc "clear"
 </IfModule>

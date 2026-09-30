@@ -8,7 +8,7 @@ Oefenwebsite voor kinderen uit het 1ste leerjaar (6–7 jaar, Vlaams onderwijs).
 - Opslag in flat files onder `data/` (gitignored, via `.htaccess` afgeschermd). Geen database.
 - Hosting: Apache shared hosting. **Elke push naar `main` deployt meteen via FTP** (`.github/workflows/deploy.yml`). Nieuwe bestanden die niet publiek mogen staan, toevoegen aan de `exclude`-lijst daar.
 - De repo is publiek op GitHub: geen geheimen of persoonsgegevens committen.
-- De host adverteert HTTP/3 (`Alt-Svc: h3`) maar antwoordt er niet op; daardoor bleef de eerste klik hangen. `.htaccess` zet `Alt-Svc: clear` — niet weghalen.
+- De host adverteert HTTP/3 (`Alt-Svc: h3`) maar antwoordt er niet op; daardoor bleef de eerste klik hangen. `.htaccess` zet `Alt-Svc: clear`, maar de host overschrijft die header nog; HTTP/3 moet bij de hostingprovider (DIGI) uitgezet of gerepareerd worden. Controle: `curl -4 --http3-only -m 8 https://elena.delamarche.be/` moet antwoorden of de `alt-svc`-header moet weg zijn.
 
 ## Lokaal draaien
 
