@@ -19,6 +19,7 @@ $CATEGORIES = [
             'subtraction'   => ['name' => 'Aftrekken',         'emoji' => '➖'],
             'mixed'         => ['name' => 'Gemengd',           'emoji' => '🔄'],
             'times_tables'  => ['name' => 'Maaltafels',        'emoji' => '✖️'],
+            'division'      => ['name' => 'Delen',             'emoji' => '➗'],
             'three_numbers' => ['name' => 'Drie getallen',     'emoji' => '3️⃣'],
             'splitting'     => ['name' => 'Splitsen',          'emoji' => '✂️'],
             'missing'       => ['name' => 'Ontbrekend getal',  'emoji' => '❓'],

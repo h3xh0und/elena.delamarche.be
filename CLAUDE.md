@@ -37,7 +37,7 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES`, generator + `match`-tak in `a
 - UI-teksten, CSS-klassen, element-id's en JSON-velden zijn **Nederlands** (`vraag`, `antwoord`, `opties`, `verborgen`). PHP/JS-identifiers en oefening-keys zijn Engels (`splitting`, `rSplitting`).
 - Oefening-keys niet hernoemen: de voortgang per kind is erop opgeslagen. `flatfile.php` bevat mappings van oude Nederlandse keys.
 - Klokoefeningen (`clock`, `digital_clock`) gebruiken de instelling `clock_level`. Tijd in woorden volgens de Vlaamse manier (`_clockWords`: "10 voor half 4"); digitaal schrijven gebeurt met een uur- en minutenvakje (`klok_invoer: 'tijd'`).
-- Getallen respecteren altijd de instelling "tot welk getal" (`$maxNumber`: 10/20/30/50/100). Maaltafels hebben een eigen instelling (`tables_max`, 2–10): tafels van 1 t.e.m. die waarde, telkens 1–10 ×.
+- Getallen respecteren altijd de instelling "tot welk getal" (`$maxNumber`: 10/20/30/50/100). Maaltafels en delen (`division`, notatie `12 : 3`) hebben een eigen instelling (`tables_max`, 2–10): tafels van 2 t.e.m. die waarde, telkens 2–10 × (× 1 en : 1 bewust weggelaten).
 - Per-kind instellingen: lezen/schrijven in `flatfile.php`, actie in `api/settings.php`, kaart in `settings.php`.
 - Didactiek volgt de Vlaamse methode. Splitsingen zijn een **driehoek**: het geheel bovenaan, één deel onderaan gegeven, de andere hoek invullen — geen som zoals `8 = 3 + ?`.
 - Doelgroep is 6–7 jaar, vaak op tablet: grote tikdoelen, weinig tekst, numpad i.p.v. toetsenbord. Controleer ook de landscape-layout.

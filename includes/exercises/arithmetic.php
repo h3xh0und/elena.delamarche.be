@@ -7,6 +7,7 @@ function generateArithmeticExercise(string $type, int $maxNumber = 20, string $c
         'subtraction'   => rSubtraction($mx),
         'mixed'         => rMixed($mx),
         'times_tables'  => rTimesTables($tablesMax),
+        'division'      => rDivision($tablesMax),
         'three_numbers' => rThreeNumbers($mx),
         'neighbours'    => rCountingNeighbours($mx),
         'splitting'     => rSplitting($mx),
@@ -55,13 +56,27 @@ function rMixed(int $max = 20): array {
     return rand(0, 1) ? rAddition($max) : rSubtraction($max);
 }
 
+/* Tafels van 2 t.e.m. $maxTable, telkens 2–10 × (× 1 heeft geen nut) */
 function rTimesTables(int $maxTable = 5): array {
-    $table = rand(1, max(1, min(10, $maxTable)));
-    $n     = rand(1, 10);
+    $table = rand(2, max(2, min(10, $maxTable)));
+    $n     = rand(2, 10);
     return [
         'type'     => 'invul',
         'vraag'    => "$n × $table = ?",
         'antwoord' => (string)($n * $table),
+        'invoer'   => 'getal',
+    ];
+}
+
+/* Deeltafels: omgekeerde van de maaltafels, zelfde bereik, Vlaamse notatie "12 : 3" */
+function rDivision(int $maxTable = 5): array {
+    $table = rand(2, max(2, min(10, $maxTable)));
+    $n     = rand(2, 10);
+    $total = $n * $table;
+    return [
+        'type'     => 'invul',
+        'vraag'    => "$total : $table = ?",
+        'antwoord' => (string)$n,
         'invoer'   => 'getal',
     ];
 }

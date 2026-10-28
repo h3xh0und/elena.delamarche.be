@@ -65,9 +65,9 @@ $clockLevels = [
 
     <!-- Maaltafels -->
     <div class="inst-kaart">
-        <h2 class="inst-titel">✖️ Maaltafels — tot welke tafel?</h2>
+        <h2 class="inst-titel">✖️ Maaltafels en ➗ delen — tot welke tafel?</h2>
         <p class="inst-omschrijving">
-            Kies tot welke maaltafel er geoefend wordt. "tot 5" oefent de tafels van 1 tot en met 5.
+            Geldt voor Maaltafels én Delen. "tot 5" oefent de tafels van 2 tot en met 5.
         </p>
         <div class="getal-knoppen" id="tafels-knoppen">
             <?php foreach (range(2, 10) as $opt): ?>
