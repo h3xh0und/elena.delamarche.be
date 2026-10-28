@@ -27,6 +27,7 @@ $highscore = readSpeedtestHighscore($user);
         <span class="oef-header-naam">Sneltest</span>
     </div>
     <div class="score-teller" id="header-timer">2:00</div>
+    <button type="button" id="geluid-knop" class="geluid-knop" aria-label="Geluid aan of uit">🔇</button>
 </header>
 
 <main class="oefening-main">
@@ -37,7 +38,8 @@ $highscore = readSpeedtestHighscore($user);
             <div style="font-size:3.5rem;line-height:1;margin-bottom:.5rem">⚡</div>
             <div class="oef-vraag-tekst" style="font-size:2rem;margin-bottom:.5rem">Sneltest</div>
             <p style="color:var(--tekst-zacht);font-size:1.05rem;margin-bottom:1.25rem">
-                Maak zoveel mogelijk sommen in <strong>2 minuten</strong>!
+                Maak zoveel mogelijk sommen in <strong>2 minuten</strong>!<br>
+                ➕ ➖ ✖️ ➗ om de beurt
             </p>
             <?php if ($highscore > 0): ?>
             <p style="font-size:1rem;font-weight:800;color:var(--oranje);margin-bottom:1.25rem">
@@ -120,6 +122,7 @@ $highscore = readSpeedtestHighscore($user);
 
 </main>
 
+<script src="<?= asset('assets/js/sound.js') ?>"></script>
 <script>
 const CSRF        = <?= json_encode($csrf) ?>;
 const DURATION    = 120;
@@ -131,6 +134,7 @@ let scoreCorrect  = 0;
 let scoreTotal    = 0;
 let running       = false;
 let questionHistory = [];
+let questionNr      = 0;
 
 let numVal = '';
 
@@ -179,6 +183,7 @@ function resetInput() {
     updateDisplay();
 }
 
+Sound.init(document.getElementById('geluid-knop'));
 document.getElementById('start-knop').addEventListener('click', startTest);
 document.getElementById('opnieuw-knop').addEventListener('click', () => location.reload());
 el.ok.addEventListener('click', submit);
@@ -199,6 +204,7 @@ async function startTest() {
     scoreTotal   = 0;
     running      = true;
     questionHistory = [];
+    questionNr      = 0;
 
     el.phaseStart.classList.add('verborgen');
     el.phaseRunning.classList.remove('verborgen');
@@ -232,11 +238,12 @@ async function loadQuestion() {
     try {
         let data, attempts = 0;
         do {
-            const res = await fetch('api/exercise.php?cat=speedtest');
+            const res = await fetch('api/exercise.php?cat=speedtest&stap=' + questionNr);
             data = await res.json();
             attempts++;
         } while (questionHistory.includes(data.vraag) && attempts < 6);
 
+        questionNr++;
         questionHistory.push(data.vraag);
         if (questionHistory.length > 12) questionHistory.shift();
         // Show the typed answer in place of the "?"
@@ -266,6 +273,7 @@ async function submit() {
     const data = await res.json();
 
     if (data.correct) scoreCorrect++;
+    Sound.play(data.correct ? 'good' : 'wrong');
     el.correct.textContent = scoreCorrect;
     el.total.textContent   = scoreTotal;
 
@@ -287,6 +295,7 @@ function endTest() {
 
     const pct = scoreTotal > 0 ? Math.round(scoreCorrect / scoreTotal * 100) : 0;
     el.endPct.textContent = pct + '% correct';
+    Sound.play('round');
 
     if      (pct >= 90) el.endEmoji.textContent = '🏆';
     else if (pct >= 70) el.endEmoji.textContent = '⭐';

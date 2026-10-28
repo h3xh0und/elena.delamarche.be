@@ -351,20 +351,26 @@ function rCommutative(int $max = 20): array {
         : ['type' => 'invul', 'label' => "$a + $b = $sum", 'vraag' => "$sum − $a = ?", 'antwoord' => (string)$b, 'invoer' => 'getal'];
 }
 
-function rSpeedTest(int $max = 20): array {
-    $mx   = max(10, $max);
-    $min  = max(2, (int)($mx / 10));
-    $type = rand(0, 2);
-    if ($type <= 1) {
-        $a = rand($min, $mx - $min);
-        $b = rand($min, $mx - $a);
-        return ['type' => 'invul', 'vraag' => "$a + $b = ?",
-                'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
+/* Sneltest: + − × : om de beurt ($step telt de vragen), elk binnen de eigen instelling */
+function rSpeedTest(int $max = 20, int $tablesMax = 5, int $step = 0): array {
+    $mx  = max(10, $max);
+    $min = max(2, (int)($mx / 10));
+    switch ($step % 4) {
+        case 0:
+            $a = rand($min, $mx - $min);
+            $b = rand($min, $mx - $a);
+            return ['type' => 'invul', 'vraag' => "$a + $b = ?",
+                    'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
+        case 1:
+            $a = rand($min * 2, $mx);
+            $b = rand($min, $a - $min);
+            return ['type' => 'invul', 'vraag' => "$a − $b = ?",
+                    'antwoord' => (string)($a - $b), 'invoer' => 'getal'];
+        case 2:
+            return rTimesTables($tablesMax);
+        default:
+            return rDivision($tablesMax);
     }
-    $a = rand($min * 2, $mx);
-    $b = rand($min, $a - $min);
-    return ['type' => 'invul', 'vraag' => "$a − $b = ?",
-            'antwoord' => (string)($a - $b), 'invoer' => 'getal'];
 }
 
 function rMoney(): array {

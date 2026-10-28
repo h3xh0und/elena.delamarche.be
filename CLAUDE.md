@@ -50,7 +50,8 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES`, generator + `match`-tak in `a
 - Het getypte antwoord verschijnt ín de oefening (element met klasse `antwoord-live`), niet in een apart veld.
 - Feedback meteen en vriendelijk: juist → groen + sterretjes, gaat vanzelf verder; fout → oranje (niet rood), juiste antwoord tonen, kind tikt zelf op "Verder". Geen straf, geen tijdsdruk buiten de Sneltest.
 - Oefeningen in rondes van 10 met voortgangsbalk en eindscherm met sterren.
-- Geluid staat standaard uit (klaslokaal), aan te zetten met 🔇/🔊; wordt onthouden in `localStorage`.
+- Geluid staat standaard uit (klaslokaal), aan te zetten met 🔇/🔊; wordt onthouden in `localStorage`. Alle geluid zit in `assets/js/sound.js` (`Sound.play('good' | 'wrong' | 'round')`, gegenereerd met Web Audio); `round` is een fanfare met applaus op het einde van een reeks en van de Sneltest.
+- Sneltest (`rSpeedTest`) wisselt + − × : om de beurt af via de vraagteller `stap`; + en − volgen `$maxNumber`, × en : volgen `tables_max`.
 - Een oefenscherm moet zonder scrollen passen op telefoon (staand én liggend), iPad en desktop. Liggend: vraag links, numpad rechts.
 - Respecteer `prefers-reduced-motion`; `:focus-visible` blijft zichtbaar voor toetsenbordgebruik.
 - Beveiliging intact houden: CSRF-check op elke POST, `esc()` / `htmlspecialchars()` bij output, CSP staat geen externe bronnen toe.

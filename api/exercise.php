@@ -40,7 +40,7 @@ try {
     $tablesMax  = readTablesMax($user);
 
     if ($cat === 'speedtest') {
-        $exercise = rSpeedTest($maxNumber);
+        $exercise = rSpeedTest($maxNumber, $tablesMax, (int)($_GET['stap'] ?? 0));
     } elseif (in_array($cat, $arithmeticTypes)) {
         $exercise = generateArithmeticExercise($cat, $maxNumber, $clockLevel, $jumpStep, $tablesMax);
     } elseif ($cat === 'word_problems') {

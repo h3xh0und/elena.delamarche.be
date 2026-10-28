@@ -125,6 +125,7 @@ $csrf     = csrfToken();
     const CATEGORIE = <?= json_encode($cat) ?>;
     const CSRF      = <?= json_encode($csrf) ?>;
 </script>
+<script src="<?= asset('assets/js/sound.js') ?>"></script>
 <script src="<?= asset('assets/js/app.js') ?>"></script>
 
 </body>

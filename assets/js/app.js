@@ -13,7 +13,6 @@ const state = {
   round:          [],     // true/false per answered exercise in this round
   locked:         false,  // input blocked while checking / showing feedback
   waiting:        false,  // feedback shown, waiting for "Verder"
-  sound:          false,
 };
 
 /* ── DOM refs ──────────────────────────────────────────── */
@@ -60,7 +59,7 @@ const el = {
 
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  initSound();
+  Sound.init(el.soundBtn);
   renderRoundBar();
   loadNextExercise();
 
@@ -124,7 +123,7 @@ function showRoundEnd() {
   el.roundDone.classList.remove('verborgen');
   el.roundAgain.focus({ preventScroll: true });
 
-  play('round');
+  Sound.play('round');
   confetti(24);
 }
 
@@ -582,7 +581,7 @@ function showFeedback(correct, message) {
   el.fbMessage.textContent = message;
   el.feedback.classList.remove('verborgen');
 
-  play(correct ? 'good' : 'wrong');
+  Sound.play(correct ? 'good' : 'wrong');
   if (navigator.vibrate) navigator.vibrate(correct ? 40 : [30, 60, 30]);
 
   if (correct) {
@@ -619,53 +618,6 @@ function confetti(count) {
   }
   document.body.appendChild(box);
   setTimeout(() => box.remove(), 1000);
-}
-
-/* ── Sound (generated, no audio files) ─────────────────── */
-let audioCtx = null;
-
-function initSound() {
-  try { state.sound = localStorage.getItem('geluid') === 'aan'; } catch (e) {}
-  updateSoundBtn();
-  el.soundBtn.addEventListener('click', () => {
-    state.sound = !state.sound;
-    try { localStorage.setItem('geluid', state.sound ? 'aan' : 'uit'); } catch (e) {}
-    updateSoundBtn();
-    play('good');
-  });
-}
-
-function updateSoundBtn() {
-  el.soundBtn.textContent = state.sound ? '🔊' : '🔇';
-  el.soundBtn.setAttribute('aria-pressed', state.sound ? 'true' : 'false');
-}
-
-function play(kind) {
-  if (!state.sound) return;
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return;
-  try {
-    audioCtx = audioCtx || new Ctx();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const notes = {
-      good:  [[660, 0], [880, .1]],
-      wrong: [[300, 0], [250, .14]],
-      round: [[523, 0], [659, .12], [784, .24], [1047, .36]],
-    }[kind];
-    notes.forEach(([freq, at]) => {
-      const osc  = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const t    = audioCtx.currentTime + at;
-      osc.type = kind === 'wrong' ? 'sine' : 'triangle';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(.0001, t);
-      gain.gain.exponentialRampToValueAtTime(.25, t + .02);
-      gain.gain.exponentialRampToValueAtTime(.0001, t + .22);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + .25);
-    });
-  } catch (e) {}
 }
 
 /* ── Helpers ───────────────────────────────────────────── */
