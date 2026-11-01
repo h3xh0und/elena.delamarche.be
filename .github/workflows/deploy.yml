@@ -12,6 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
 
+      - name: Write APM config
+        env:
+          APM_SECRET_TOKEN: ${{ secrets.APM_SECRET_TOKEN }}
+        run: |
+          if [ -n "$APM_SECRET_TOKEN" ]; then
+            printf "<?php\nreturn ['url' => 'https://apm.jonasdlm.be', 'token' => '%s'];\n" "$APM_SECRET_TOKEN" > includes/apm.local.php
+          fi
+
       - name: Upload via FTP
         uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
         with:
