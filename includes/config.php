@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/apm.php';
+apm_start('elena-delamarche-be');
+
 define('DATA_DIR',     __DIR__ . '/../data');
 define('USERS_DIR',    DATA_DIR . '/users');
 define('PROGRESS_DIR', DATA_DIR . '/progress');

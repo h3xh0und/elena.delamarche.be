@@ -72,6 +72,15 @@
     </div>
 
     <div class="inst-kaart">
+        <h2 class="inst-titel">Technische metingen</h2>
+        <p class="inst-omschrijving">
+            Om fouten op te sporen meten we op onze eigen server hoe lang een pagina nodig heeft
+            en of ze goed werkt. Daarbij bewaren we <strong>geen naam, geen IP-adres en geen
+            voortgang</strong>, en niets uit de browser van het kind.
+        </p>
+    </div>
+
+    <div class="inst-kaart">
         <h2 class="inst-titel">Derde partijen</h2>
         <p class="inst-omschrijving">
             Er worden <strong>geen gegevens gedeeld met derde partijen</strong>.

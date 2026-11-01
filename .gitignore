@@ -6,3 +6,4 @@ setup.php
 migrate.php
 toetsen/
 .claude/
+includes/apm.local.php
