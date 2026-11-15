@@ -1,9 +1,11 @@
 data/users/
 data/progress/
 data/ratelimit/
+data/stats/
 original_exercises/
 setup.php
 migrate.php
 toetsen/
 .claude/
 includes/apm.local.php
+includes/stats.local.php

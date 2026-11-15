@@ -28,9 +28,9 @@ Er zijn geen tests of linters. Minimaal `php -l` draaien op gewijzigde PHP-besta
 3. `assets/js/app.js` — `showExercise()` kiest op `type` een `setup…()`-functie die de oefening tekent.
 4. `api/answer.php` — vergelijkt het antwoord met de sessie en bewaart de voortgang.
 
-Oefening-types (`type`): `invul` (numpad), `keuze`, `ordenen`, `klok`, `rekenslang`, `splitsing`, `pictogram`.
+Oefening-types (`type`): `invul` (numpad), `keuze`, `ordenen`, `klok`, `rekenslang`, `splitsing`, `pictogram`, `verhaal` (vraagstukje met tekening en antwoordzin), `hte` (H T E-tabel), `getallenas`, `rij` (rangtelwoorden).
 
-Nieuwe oefening toevoegen: entry in `$CATEGORIES`, generator + `match`-tak in `arithmetic.php`, en alleen als er een nieuwe weergave nodig is ook een `setup…()` in `app.js` plus CSS.
+Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'`**, generator + `match`-tak in `arithmetic.php`, en alleen als er een nieuwe weergave nodig is ook een `setup…()` in `app.js` plus CSS. Door `since` staat de nieuwste reeks (alles tot 30 dagen voor de recentste `since`) bovenaan het dashboard onder "✨ Nieuw", direct na de Sneltest; oudere oefeningen staan gewoon in hun eigen vak.
 
 ## Conventies
 
@@ -38,6 +38,7 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES`, generator + `match`-tak in `a
 - Oefening-keys niet hernoemen: de voortgang per kind is erop opgeslagen. `flatfile.php` bevat mappings van oude Nederlandse keys.
 - Klokoefeningen (`clock`, `digital_clock`) gebruiken de instelling `clock_level`. Tijd in woorden volgens de Vlaamse manier (`_clockWords`: "10 voor half 4"); digitaal schrijven gebeurt met een uur- en minutenvakje (`klok_invoer: 'tijd'`).
 - Getallen respecteren altijd de instelling "tot welk getal" (`$maxNumber`: 10/20/30/50/100). Maaltafels en delen (`division`, notatie `12 : 3`) hebben een eigen instelling (`tables_max`, 2–10): tafels van 2 t.e.m. die waarde, telkens 2–10 × (× 1 en : 1 bewust weggelaten).
+- Gebruiksstatistiek (`stats.php`): enkel totalen. `recordDailyUsage()` telt per dag het aantal antwoorden en het aantal kinderen dat oefende (`data/stats/daily.json`), zonder te bewaren wie. De pagina vraagt de sleutel uit het GitHub-secret `STATS_KEY` (deploy schrijft `includes/stats.local.php`).
 - Per-kind instellingen: lezen/schrijven in `flatfile.php`, actie in `api/settings.php`, kaart in `settings.php`.
 - Didactiek volgt de Vlaamse methode. Splitsingen zijn een **driehoek**: het geheel bovenaan, één deel onderaan gegeven, de andere hoek invullen — geen som zoals `8 = 3 + ?`.
 - Doelgroep is 6–7 jaar, vaak op tablet: grote tikdoelen, weinig tekst, numpad i.p.v. toetsenbord. Controleer ook de landscape-layout.

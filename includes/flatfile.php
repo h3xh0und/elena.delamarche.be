@@ -194,6 +194,9 @@ function readProgress(string $name): array {
 
 function saveProgress(string $name, string $exercise, bool $correct): void {
     $progress = readProgress($name);
+    $today    = date('Y-m-d');
+    $firstToday = !in_array($today, array_column($progress, 'last'), true);
+    recordDailyUsage($firstToday);
     if (!isset($progress[$exercise])) {
         $progress[$exercise] = ['done' => 0, 'correct' => 0, 'last' => ''];
     }
@@ -233,4 +236,31 @@ function registerFailedAttempt(string $name): void {
 function resetRateLimit(string $name): void {
     $path = _rateLimitPath($name);
     if (file_exists($path)) unlink($path);
+}
+
+/* Anonieme gebruiksteller per dag: enkel totalen, nooit wie.
+   'kinderen' = aantal accounts dat die dag minstens één oefening maakte, 'oefeningen' = aantal antwoorden. */
+function recordDailyUsage(bool $newChildToday): void {
+    $path = STATS_DIR . '/daily.json';
+    if (!is_dir(STATS_DIR) && !@mkdir(STATS_DIR, 0755, true)) return;
+    $fp = @fopen($path, 'c+');
+    if (!$fp) return;
+    flock($fp, LOCK_EX);
+    $data  = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
+    $today = date('Y-m-d');
+    $day   = $data[$today] ?? ['kinderen' => 0, 'oefeningen' => 0];
+    $day['oefeningen']++;
+    if ($newChildToday) $day['kinderen']++;
+    $data[$today] = $day;
+    ksort($data);
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($data, JSON_PRETTY_PRINT));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+}
+
+function readDailyUsage(): array {
+    return _readJson(STATS_DIR . '/daily.json') ?? [];
 }

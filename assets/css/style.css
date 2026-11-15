@@ -230,6 +230,7 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
 }
 
 .vak-sectie { margin-bottom: 2rem; }
+.nieuw-sectie .vak-titel { color: var(--primair-dark); }
 
 .vak-titel {
   font-size: 1.35rem;
@@ -667,6 +668,98 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
   margin-left: .3rem;
   font-weight: 900;
   font-size: 1rem;
+}
+
+/* ── Vraagstukjes: tekening en antwoordzin ────────────── */
+.plaatje {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .4rem;
+  font-size: clamp(.85rem, min(4.2vw, 3.4vh), 1.4rem);
+  line-height: 1.15;
+}
+.plaatje:empty { display: none; }
+.plaatje.veel { font-size: clamp(.8rem, min(3.4vw, 2.6vh), 1.1rem); }
+.pl-groep, .pl-los {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 6.2em;
+  padding: .2rem .3rem;
+  border: 2px dashed var(--rand-dark);
+  border-radius: 12px;
+}
+.pl-los { max-width: 14em; border-style: solid; border-color: var(--rand); }
+.antwoordzin { font-size: clamp(1.25rem, 4.5vw, 1.6rem); font-weight: 900; margin-top: .5rem; }
+@media (max-height: 820px) {
+  .oefening-kaart:has(.plaatje) .oef-vraag-label { display: none; }
+  .oefening-kaart:has(.plaatje) .oef-inhoud { gap: .6rem; }
+  .antwoordzin { margin-top: 0; }
+}
+
+/* ── H T E ────────────────────────────────────────────── */
+.hte-tabel {
+  margin: 0 auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  font-weight: 900;
+  border: 3px solid var(--tekst);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.hte-tabel th, .hte-tabel td {
+  min-width: 2.4em;
+  height: 1.9em;
+  padding: .15rem .4rem;
+  border-left: 2px solid var(--tekst);
+  text-align: center;
+}
+.hte-tabel th:first-child, .hte-tabel td:first-child { border-left: none; }
+.hte-tabel td { border-top: 2px solid var(--tekst); }
+.hte-tabel th { font-size: .7em; }
+.hte-tabel .hte-getal { font-size: .55em; background: #f4f5fa; min-width: 3.2em; }
+.hte-tabel .hte-H { background: #2563eb; color: #fff; }
+.hte-tabel .hte-T { background: #15803d; color: #fff; }
+.hte-tabel .hte-E { background: #fde047; color: var(--tekst); }
+.hte-tabel .antwoord-vak { font-size: 1em; min-width: 1.4em; }
+
+/* ── Getallenas ───────────────────────────────────────── */
+.getallenas { width: 100%; max-width: 560px; display: block; margin: 0 auto; }
+.nl-as, .nl-streep { stroke: var(--tekst); stroke-width: 2; stroke-linecap: round; }
+.nl-as { stroke-width: 3; }
+.nl-tiental { font: 900 17px var(--font); fill: var(--tekst); text-anchor: middle; }
+.nl-pijl { fill: var(--accent); }
+.nl-antwoord rect { fill: var(--accent-licht); stroke: var(--accent); stroke-width: 3; stroke-dasharray: 7 5; }
+.nl-antwoord text { font: 900 24px var(--font); fill: var(--tekst); text-anchor: middle; dominant-baseline: central; }
+.nl-antwoord text.leeg { fill: var(--accent); opacity: .75; }
+.nl-antwoord:has(.goed) rect { fill: var(--groen-licht); stroke: var(--groen); stroke-dasharray: none; }
+.nl-antwoord text.goed { fill: var(--groen-dark); }
+.nl-antwoord:has(.juist-getoond) rect { fill: var(--oranje-licht); stroke: var(--oranje); stroke-dasharray: none; }
+.nl-antwoord text.juist-getoond { fill: var(--oranje-dark); }
+
+/* ── Rij voorwerpen (rangtelwoorden) ──────────────────── */
+.rij-wrap { display: flex; align-items: flex-start; gap: .3rem; width: 100%; container-type: inline-size; }
+.rij-start { font-size: 1.4rem; line-height: 1; padding-top: .35rem; }
+.rij {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 2px;
+  padding: .3rem;
+  background: #f8f9fd;
+  border: 2px solid var(--rand);
+  border-radius: 14px;
+}
+.rij-plek { display: flex; flex-direction: column; align-items: center; gap: .25rem; min-width: 0; }
+.rij-item { font-size: clamp(1.1rem, 7.5cqi, 2.4rem); line-height: 1.2; }
+.rij-plek.doel .rij-item { background: var(--accent-licht); border-radius: 10px; box-shadow: 0 0 0 3px var(--accent); }
+.rij-plek .antwoord-vak { font-size: 1.3rem; min-width: 1.6em; }
+@media (min-height: 481px) { .oefening-kaart:has(.rij-wrap) .keuze-knop { font-size: 2.2rem; min-width: 80px; } }
+@media (max-height: 480px) {
+  .antwoordzin { margin-top: 0; }
+  .oefening-kaart:has(.plaatje) .lang-vraag { font-size: 1.15rem !important; line-height: 1.3; }
 }
 
 /* ── Invoer zones ─────────────────────────────────────── */
@@ -1194,6 +1287,21 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ── Gebruiksstatistiek (stats.php) ─────────────────── */
+.stat-tegels { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+.stat-tegel { background: var(--kaart); border-radius: var(--radius-sm); box-shadow: var(--schaduw); padding: 1rem; text-align: center; }
+.stat-getal { font-size: 2.2rem; font-weight: 900; color: var(--primair-dark); line-height: 1.1; }
+.stat-label { font-weight: 800; color: var(--tekst-zacht); }
+.stat-dagen { width: 100%; display: flex; align-items: flex-end; gap: 3px; height: 120px; margin-top: 1rem; border-bottom: 2px solid var(--rand-dark); }
+.stat-dag { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.stat-staaf { display: block; width: 100%; background: var(--primair); border-radius: 4px 4px 0 0; }
+.stat-as { width: 100%; display: flex; justify-content: space-between; font-size: .85rem; font-weight: 700; color: var(--tekst-zacht); margin-top: .25rem; }
+.stat-tabel { width: 100%; border-collapse: collapse; margin-top: .75rem; font-weight: 700; }
+.stat-tabel th, .stat-tabel td { padding: .45rem .5rem; border-bottom: 1px solid var(--rand); text-align: right; }
+.stat-tabel th:first-child, .stat-tabel td:first-child { text-align: left; }
+.stat-tabel th { color: var(--tekst-zacht); font-size: .9rem; }
+.stat-balk { display: block; height: 6px; margin-top: .25rem; background: var(--primair-licht); border-radius: 3px; box-shadow: inset 0 0 0 1px var(--primair); }
 
 /* ── Sticky footer (dashboard, settings, privacy) ───────── */
 .site-page {
