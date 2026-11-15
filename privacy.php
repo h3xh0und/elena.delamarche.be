@@ -81,6 +81,15 @@
     </div>
 
     <div class="inst-kaart">
+        <h2 class="inst-titel">Gebruikscijfers</h2>
+        <p class="inst-omschrijving">
+            Om te weten of de website gebruikt wordt, tellen we per dag enkel <strong>hoeveel</strong>
+            oefeningen er gemaakt zijn en <strong>hoeveel</strong> kinderen geoefend hebben. We bewaren
+            daarbij niet wie: geen naam, geen IP-adres, geen cookie en geen tracking.
+        </p>
+    </div>
+
+    <div class="inst-kaart">
         <h2 class="inst-titel">Derde partijen</h2>
         <p class="inst-omschrijving">
             Er worden <strong>geen gegevens gedeeld met derde partijen</strong>.
@@ -121,7 +130,7 @@
             <a href="mailto:hello@jonasdlm.be" style="color:var(--primair)">hello@jonasdlm.be</a>
         </p>
         <p class="inst-omschrijving" style="margin-top:.5rem;color:var(--tekst-zacht);font-size:.9rem">
-            Verantwoordelijke: Jonas De la Marche · Laatste aanpassing: juni 2025
+            Verantwoordelijke: Jonas De la Marche · Laatste aanpassing: november 2026
         </p>
     </div>
 

@@ -153,12 +153,9 @@ function showExercise(data) {
   el.question.classList.remove('lang-vraag');
 
   const questionText = data.vraag || '';
-  // A stand-alone "?" is the blank to fill in: show the typed answer right there.
-  const blank = /(^|\s)\?(?=\s|$)/;
 
-  if (data.type === 'invul' && blank.test(questionText)) {
-    el.question.innerHTML = esc(questionText)
-      .replace(blank, '$1<span class="antwoord-vak antwoord-live leeg">?</span>');
+  if (data.type === 'invul' && BLANK.test(questionText)) {
+    el.question.innerHTML = withBlank(questionText);
   } else if (data.type === 'keuze' && questionText && isNaN(questionText)) {
     el.question.innerHTML = `<span class="keuze-vraag-display">${esc(questionText)}</span>`;
   } else {
@@ -175,6 +172,10 @@ function showExercise(data) {
     case 'rekenslang': setupNumberSnake(data); break;
     case 'splitsing':  setupSplitting(data);   break;
     case 'pictogram':  setupPictogram(data);   break;
+    case 'verhaal':    setupStory(data);       break;
+    case 'hte':        setupPlaceValue(data);  break;
+    case 'getallenas': setupNumberLine(data);  break;
+    case 'rij':        setupRow(data);         break;
     default:           setupFill(data);
   }
 
@@ -441,6 +442,73 @@ function renderPictogram(data) {
   el.extra.innerHTML = html;
 }
 
+/* Word problem with a drawing to count on and an answer sentence ("Er zijn ? knikkers.") */
+function setupStory(data) {
+  const p    = data.plaatje || {};
+  const item = `<span class="pl-item">${esc(p.emoji || '')}</span>`;
+  let pic = '';
+  if (p.groepen > 0) {
+    pic = Array.from({ length: p.groepen }, () => `<span class="pl-groep">${item.repeat(p.per)}</span>`).join('');
+  } else if (p.per > 0) {
+    pic = `<span class="pl-los">${item.repeat(p.per)}</span>`;
+  }
+  const many = (p.groepen || 1) * (p.per || 0) > 20;
+  el.extra.innerHTML = `<div class="plaatje${many ? ' veel' : ''}" aria-hidden="true">${pic}</div>`
+                     + `<div class="antwoordzin">${withBlank(data.antwoordzin || '')}</div>`;
+  state.currentType = 'invul';
+  setupFill(data);
+}
+
+/* H T E table in the colours of the school book: blue hundreds, green tens, yellow units */
+function setupPlaceValue(data) {
+  const cell = v => v === '?' ? '<span class="antwoord-vak antwoord-live leeg">?</span>' : esc(v);
+  const cols = Object.keys(data.kolommen || {});
+  el.extra.innerHTML =
+      `<table class="hte-tabel"><thead><tr><th class="hte-getal">Getal</th>`
+    + cols.map(k => `<th class="hte-${k}">${k}</th>`).join('')
+    + `</tr></thead><tbody><tr><td>${cell(data.getal)}</td>`
+    + cols.map(k => `<td>${cell(data.kolommen[k])}</td>`).join('')
+    + `</tr></tbody></table>`;
+  state.currentType = 'invul';
+  setupFill(data);
+}
+
+/* Number line with a tick per number, tens labelled, an arrow and the answer box below it */
+function setupNumberLine(data) {
+  const from = data.van, to = data.tot, left = 18, width = 304;
+  const x = v => left + (v - from) / (to - from) * width;
+  let ticks = '';
+  for (let v = from; v <= to; v++) {
+    const h = v % 10 === 0 ? 16 : v % 5 === 0 ? 11 : 6;
+    ticks += `<line class="nl-streep" x1="${x(v)}" y1="${46 - h / 2}" x2="${x(v)}" y2="${46 + h / 2}"/>`;
+    if (v % 10 === 0) ticks += `<text class="nl-tiental" x="${x(v)}" y="26">${v}</text>`;
+  }
+  const ax  = x(data.pijl);
+  const box = Math.min(Math.max(ax, 46), 340 - 46);
+  el.extra.innerHTML =
+      `<svg viewBox="0 0 340 128" class="getallenas" aria-label="Getallenas van ${from} tot ${to}">`
+    + `<line class="nl-as" x1="${left - 6}" y1="46" x2="${left + width + 6}" y2="46"/>`
+    + ticks
+    + `<path class="nl-pijl" d="M${ax} 56 l-7 11 h4.5 v14 h5 v-14 h4.5 z"/>`
+    + `<g class="nl-antwoord"><rect x="${box - 30}" y="86" width="60" height="38" rx="9"/>`
+    + `<text class="antwoord-live leeg" x="${box}" y="106">?</text></g>`
+    + `</svg>`;
+  state.currentType = 'invul';
+  setupFill(data);
+}
+
+/* A row of things; the first one is on the left */
+function setupRow(data) {
+  const items = (data.items || []).map((it, i) =>
+      `<span class="rij-plek${i === data.doel ? ' doel' : ''}"><span class="rij-item">${esc(it)}</span>`
+    + (i === data.doel ? '<span class="antwoord-vak antwoord-live leeg">?</span>' : '')
+    + `</span>`).join('');
+  el.extra.innerHTML = `<div class="rij-wrap"><span class="rij-start" aria-label="De eerste staat hier">👉</span>`
+                     + `<div class="rij" style="--n:${(data.items || []).length}">${items}</div></div>`;
+  if (data.invoer === 'getal') { state.currentType = 'invul'; setupFill(data); }
+  else                         { state.currentType = 'keuze'; setupChoice(data); }
+}
+
 /* ── Numpad ────────────────────────────────────────────── */
 
 // Places in the question itself (blank box, snake cell, triangle corner) that mirror the typed answer.
@@ -646,6 +714,13 @@ function showZone(name) {
   };
   Object.values(map).forEach(z => z.classList.add('verborgen'));
   if (map[name]) map[name].classList.remove('verborgen');
+}
+
+// A stand-alone "?" is the blank to fill in: show the typed answer right there.
+const BLANK = /(^|\s)\?(?=[\s.,]|$)/;
+
+function withBlank(text) {
+  return esc(text).replace(BLANK, '$1<span class="antwoord-vak antwoord-live leeg">?</span>');
 }
 
 function esc(str) {

@@ -21,6 +21,15 @@ function generateArithmeticExercise(string $type, int $maxNumber = 20, string $c
         'missing'       => rMissing($mx),
         'commutative'   => rCommutative($mx),
         'money'         => rMoney(),
+        'true_false'    => rTrueFalse($tablesMax),
+        'sign_choice'   => rSignChoice($tablesMax),
+        'repeated'      => rRepeated($tablesMax),
+        'table_stories' => rTableStories($tablesMax),
+        'count_on'      => rCountOn($mx),
+        'number_facts'  => rNumberFacts($mx),
+        'place_value'   => rPlaceValue($mx),
+        'number_line'   => rNumberLine($mx),
+        'ordinal'       => rOrdinal($mx),
         default         => rAddition($mx),
     };
 }
@@ -500,6 +509,326 @@ function rWordProblems(int $max = 20): array {
                     'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
         }
     }
+}
+
+/* ── Maal- en deeltafels: begrip (toets blok 2) ──────────── */
+
+function _randTable(int $tablesMax): int {
+    return rand(2, max(2, min(10, $tablesMax)));
+}
+
+/* "7 × 2 = 14": waar of niet waar? Foute sommen zitten één rij of één ernaast. */
+function rTrueFalse(int $tablesMax = 5): array {
+    $table  = _randTable($tablesMax);
+    $n      = rand(2, 10);
+    $divide = (bool)rand(0, 1);
+    $isTrue = (bool)rand(0, 1);
+    $result = $divide ? $n : $n * $table;
+    if (!$isTrue) {
+        $wrong  = $divide ? [$n + 1, $n - 1, $table] : [$result + $table, $result - $table, $result + 1, $result - 1];
+        $wrong  = array_values(array_filter($wrong, fn($w) => $w > 0 && $w !== $result));
+        $result = $wrong[array_rand($wrong)];
+    }
+    $yes = '👍 Waar';
+    $no  = '👎 Niet waar';
+    return [
+        'type'     => 'keuze',
+        'label'    => 'Waar of niet waar?',
+        'vraag'    => $divide ? ($n * $table) . " : $table = $result" : "$n × $table = $result",
+        'opties'   => [$yes, $no],
+        'antwoord' => $isTrue ? $yes : $no,
+    ];
+}
+
+/* "6 __ 2 = 3": maal of gedeeld door? Met tafels vanaf 2 is er altijd maar één juist teken. */
+function rSignChoice(int $tablesMax = 5): array {
+    $table   = _randTable($tablesMax);
+    $n       = rand(2, 10);
+    $product = $n * $table;
+    $times   = (bool)rand(0, 1);
+    return [
+        'type'     => 'keuze',
+        'label'    => 'Kies het juiste teken:',
+        'vraag'    => $times ? "$n  __  $table = $product" : "$product  __  $table = $n",
+        'opties'   => ['×', ':'],
+        'antwoord' => $times ? '×' : ':',
+    ];
+}
+
+function _repeat(int $start, int $value, int $count, string $op): string {
+    $terms = array_fill(0, $count, $value);
+    return ($start ? "$start $op " : '') . implode(" $op ", $terms);
+}
+
+/* Herhaalde optelling ↔ vermenigvuldiging, herhaalde aftrekking ↔ deling.
+   Zoals in de methode: 3 × 7 = 7 + 7 + 7 en 10 − 5 − 5 hoort bij 10 : 5. */
+function rRepeated(int $tablesMax = 5): array {
+    $table = _randTable($tablesMax);
+    switch (rand(0, 3)) {
+        case 0: {   // 2 + 2 + 2 + 2 + 2 = ? × 2
+            $count = rand(2, 8);
+            return [
+                'type'     => 'invul',
+                'label'    => 'Schrijf als maalsom:',
+                'vraag'    => _repeat(0, $table, $count, '+') . " = ? × $table",
+                'antwoord' => (string)$count,
+                'invoer'   => 'getal',
+            ];
+        }
+        case 1: {   // 3 × 7 → 7 + 7 + 7
+            $count   = rand(2, 4);
+            $correct = _repeat(0, $table, $count, '+');
+            $options = [$correct, _repeat(0, $table, $count + 1, '+'), "$count + $table"];
+            if ($count > 2) $options[] = _repeat(0, $table, $count - 1, '+');
+            if ($count !== $table) $options[] = _repeat(0, $count, 2, '+');
+            return _repeatedChoice('Welke optelling hoort erbij?', "$count × $table", $correct, $options);
+        }
+        case 2: {   // 18 − 6 − 6 − 6 → 18 : 6
+            $count   = rand(2, 5);
+            $total   = $count * $table;
+            $correct = "$total : $table";
+            $options = [$correct];
+            foreach ([$count, $table + 1, $table - 1, $table + 2] as $d) {
+                if ($d >= 2) $options[] = "$total : $d";
+            }
+            return _repeatedChoice('Welke deling hoort erbij?', _repeat($total, $table, $count, '−'), $correct, $options);
+        }
+        default: {  // 9 : 3 → 9 − 3 − 3 − 3
+            $count   = rand(2, 4);
+            $total   = $count * $table;
+            $correct = _repeat($total, $table, $count, '−');
+            $options = [$correct, _repeat($total, $table, $count + 1, '−'), "$total − $table"];
+            if ($count !== $table && $table <= 5) $options[] = _repeat($total, $count, $table, '−');
+            return _repeatedChoice('Welke aftrekking hoort erbij?', "$total : $table", $correct, $options);
+        }
+    }
+}
+
+function _repeatedChoice(string $label, string $question, string $correct, array $options): array {
+    $wrong = array_values(array_diff(array_unique($options), [$correct]));
+    shuffle($wrong);
+    $options = array_merge([$correct], array_slice($wrong, 0, 2));
+    shuffle($options);
+    return [
+        'type'     => 'keuze',
+        'label'    => $label,
+        'vraag'    => $question,
+        'opties'   => $options,
+        'antwoord' => $correct,
+    ];
+}
+
+/* Vraagstukjes met de tafels: groepjes maken (×), eerlijk verdelen (:) en groeperen (:).
+   Een tekening met emoji helpt tellen, en het antwoord komt in een antwoordzin. */
+function rTableStories(int $tablesMax = 5): array {
+    $themes = [
+        ['groep' => 'zakjes', 'item' => 'knikkers',  'emoji' => '🔵', 'per' => 'in elk zakje'],
+        ['groep' => 'dozen',  'item' => 'eieren',    'emoji' => '🥚', 'per' => 'in elke doos'],
+        ['groep' => 'borden', 'item' => 'koekjes',   'emoji' => '🍪', 'per' => 'op elk bord'],
+        ['groep' => 'vazen',  'item' => 'bloemen',   'emoji' => '🌷', 'per' => 'in elke vaas'],
+        ['groep' => 'bakjes', 'item' => 'aardbeien', 'emoji' => '🍓', 'per' => 'in elk bakje'],
+        ['groep' => 'potjes', 'item' => 'stiften',   'emoji' => '🖍️', 'per' => 'in elk potje'],
+        ['groep' => 'manden', 'item' => 'ballen',    'emoji' => '⚽', 'per' => 'in elke mand'],
+        ['groep' => 'tafels', 'item' => 'potloden',  'emoji' => '✏️', 'per' => 'op elke tafel'],
+    ];
+    $th    = $themes[array_rand($themes)];
+    $table = _randTable($tablesMax);
+    $n     = rand(2, min(10, max(2, intdiv(40, $table))));   // hoogstens 40 tekeningetjes
+    $total = $n * $table;
+    ['groep' => $groep, 'item' => $item, 'per' => $per] = $th;
+
+    switch (rand(0, 2)) {
+        case 0:
+            return [
+                'type'       => 'verhaal',
+                'vraag'      => "Er zijn $n $groep met telkens $table $item. Hoeveel $item zijn er samen?",
+                'plaatje'    => ['emoji' => $th['emoji'], 'groepen' => $n, 'per' => $table],
+                'antwoordzin'=> "Er zijn ? $item.",
+                'antwoord'   => (string)$total,
+                'invoer'     => 'getal',
+            ];
+        case 1:
+            return [
+                'type'       => 'verhaal',
+                'vraag'      => "$total $item worden eerlijk verdeeld over $table $groep. Hoeveel $item komen er $per?",
+                'plaatje'    => ['emoji' => $th['emoji'], 'groepen' => 0, 'per' => $total],
+                'antwoordzin'=> "Er komen ? $item $per.",
+                'antwoord'   => (string)$n,
+                'invoer'     => 'getal',
+            ];
+        default:
+            return [
+                'type'       => 'verhaal',
+                'vraag'      => "Je hebt $total $item. Er gaan er $table $per. Hoeveel $groep heb je nodig?",
+                'plaatje'    => ['emoji' => $th['emoji'], 'groepen' => 0, 'per' => $total],
+                'antwoordzin'=> "Ik heb ? $groep nodig.",
+                'antwoord'   => (string)$n,
+                'invoer'     => 'getal',
+            ];
+    }
+}
+
+/* ── Getallenkennis tot 100 (toets blok 2) ─────────────────── */
+
+/* Tel verder of terug met sprongen van 1, 2, 5 of 10, vanaf een willekeurig getal (14, 16, 18, ?) */
+function rCountOn(int $max = 20): array {
+    $steps = [1, 2];
+    if ($max >= 30) $steps[] = 5;
+    if ($max >= 50) $steps[] = 10;
+    $step    = $steps[array_rand($steps)];
+    $forward = (bool)rand(0, 1);
+    $span    = 4 * $step;
+
+    if ($step === 1 && $max >= 20 && rand(0, 1)) {
+        // Over het tiental heen: daar lopen kinderen vast (31, 30, 29, ...)
+        $ten   = rand(1, intdiv($max - 1, 10)) * 10;
+        $start = $forward ? $ten - rand(1, 3) : $ten + rand(1, 2);
+        $start = max($forward ? 0 : $span, min($forward ? $max - $span : $max, $start));
+    } else {
+        $start = $forward ? rand(0, $max - $span) : rand($span, $max);
+    }
+
+    $row     = array_map(fn($i) => $forward ? $start + $i * $step : $start - $i * $step, range(0, 4));
+    $pos     = rand(0, 2) ? 4 : 3;
+    $answer  = $row[$pos];
+    $row[$pos] = '?';
+    return [
+        'type'     => 'invul',
+        'label'    => ($forward ? 'Tel verder' : 'Tel terug') . " met sprongen van $step:",
+        'vraag'    => implode('  →  ', $row),
+        'antwoord' => (string)$answer,
+        'invoer'   => 'getal',
+    ];
+}
+
+/* "56 komt juist na ?", "Het tiental na 56 is ?", "Twee plaatsen na 38 komt ?" */
+function rNumberFacts(int $max = 20): array {
+    $n = rand($max >= 30 ? 11 : 3, $max - 3);
+    if ($n % 10 === 0) $n++;
+    $q = match (rand(0, 7)) {
+        0 => ["$n komt juist na ?", $n - 1],
+        1 => ["$n komt juist voor ?", $n + 1],
+        2 => ["Juist voor $n komt ?", $n - 1],
+        3 => ["Juist na $n komt ?", $n + 1],
+        4 => ["$n staat tussen ? en " . ($n + 1), $n - 1],
+        5 => ["$n staat tussen " . ($n - 1) . " en ?", $n + 1],
+        6 => rand(0, 1) ? ["Het tiental voor $n is ?", intdiv($n, 10) * 10]
+                        : ["Het tiental na $n is ?", (intdiv($n, 10) + 1) * 10],
+        default => rand(0, 1) ? ["Twee plaatsen na $n komt ?", $n + 2]
+                              : ["Twee plaatsen voor $n komt ?", $n - 2],
+    };
+    return [
+        'type'     => 'invul',
+        'vraag'    => $q[0],
+        'antwoord' => (string)$q[1],
+        'invoer'   => 'getal',
+    ];
+}
+
+/* Getal in woorden zoals op de toets: "drie-en-zestig", "dertien" */
+function numberWords(int $n): string {
+    $units = ['nul', 'een', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen',
+              'tien', 'elf', 'twaalf', 'dertien', 'veertien', 'vijftien', 'zestien', 'zeventien', 'achttien', 'negentien'];
+    $tens  = [2 => 'twintig', 'dertig', 'veertig', 'vijftig', 'zestig', 'zeventig', 'tachtig', 'negentig'];
+    if ($n >= 100) return 'honderd';
+    if ($n < 20)   return $units[$n];
+    $t = intdiv($n, 10);
+    $e = $n % 10;
+    return $e ? $units[$e] . '-en-' . $tens[$t] : $tens[$t];
+}
+
+/* H T E: van tientallen en eenheden naar het getal, omgekeerd, of van woorden naar het getal */
+function rPlaceValue(int $max = 20): array {
+    $n = ($max >= 100 && rand(0, 7) === 0) ? 100 : rand(min(11, $max), min(99, $max));
+    if (rand(0, 3) === 0) {
+        return [
+            'type'     => 'invul',
+            'label'    => 'Schrijf het getal:',
+            'vraag'    => numberWords($n) . ' = ?',
+            'antwoord' => (string)$n,
+            'invoer'   => 'getal',
+        ];
+    }
+    $digits = $n === 100 ? ['H' => 1, 'T' => 0, 'E' => 0] : ['T' => intdiv($n, 10), 'E' => $n % 10];
+    if ($max >= 100) $digits = ['H' => $digits['H'] ?? ''] + $digits;
+    $cells  = array_map(fn($d) => (string)$d, $digits);
+    $getal  = (string)$n;
+
+    if (rand(0, 1)) {                       // T en E gegeven → het getal
+        $getal  = '?';
+        $answer = $n;
+    } else {                                // het getal gegeven → T of E
+        $col          = rand(0, 1) ? 'T' : 'E';
+        $answer       = $digits[$col];
+        $cells[$col]  = '?';
+    }
+    return [
+        'type'     => 'hte',
+        'label'    => 'Vul in:',
+        'vraag'    => '',
+        'getal'    => $getal,
+        'kolommen' => $cells,
+        'antwoord' => (string)$answer,
+        'invoer'   => 'getal',
+    ];
+}
+
+/* Getallenas van 20 lang (van tiental tot tiental) met een pijl: welk getal is het? */
+function rNumberLine(int $max = 20): array {
+    $span = $max >= 20 ? 20 : 10;
+    $from = rand(0, intdiv($max - $span, 10)) * 10;
+    do { $n = rand($from + 1, $from + $span - 1); } while ($n % 10 === 0);
+    return [
+        'type'     => 'getallenas',
+        'vraag'    => 'Welk getal staat bij de pijl?',
+        'van'      => $from,
+        'tot'      => $from + $span,
+        'pijl'     => $n,
+        'antwoord' => (string)$n,
+        'invoer'   => 'getal',
+    ];
+}
+
+function ordinalWord(int $n): string {
+    return $n . (($n === 1 || $n === 8 || $n >= 20) ? 'ste' : 'de');
+}
+
+/* Rangtelwoorden: een rij voorwerpen, de eerste staat links */
+function rOrdinal(int $max = 20): array {
+    $pool = ['🍎', '⚽', '🔑', '🎈', '🧸', '🚗', '🌟', '🐸', '🍌', '🎁', '📚', '🦋', '🍓', '🚲', '🐟', '🍪', '🎸', '🌻', '🐞', '🥕'];
+    shuffle($pool);
+    $items = array_slice($pool, 0, rand(8, min(12, $max)));
+    $count = count($items);
+
+    if (rand(0, 2) === 0) {
+        $idx = rand(0, $count - 1);
+        return [
+            'type'     => 'rij',
+            'vraag'    => 'Op welke plaats staat ' . $items[$idx] . '?',
+            'items'    => $items,
+            'doel'     => $idx,
+            'antwoord' => (string)($idx + 1),
+            'invoer'   => 'getal',
+        ];
+    }
+    $kind = rand(0, 3);
+    if ($kind === 0) { $idx = $count - 1; $place = 'laatste'; }
+    elseif ($kind === 1) { $idx = $count - 2; $place = 'voorlaatste'; }
+    else { $idx = rand(1, $count - 3); $place = ordinalWord($idx + 1); }
+
+    $others = array_values(array_diff($items, [$items[$idx]]));
+    shuffle($others);
+    $options = array_merge([$items[$idx]], array_slice($others, 0, 3));
+    shuffle($options);
+    return [
+        'type'     => 'rij',
+        'vraag'    => "Wat staat op de $place plaats?",
+        'items'    => $items,
+        'doel'     => null,
+        'opties'   => $options,
+        'antwoord' => $items[$idx],
+        'invoer'   => 'keuze',
+    ];
 }
 
 /* ── Clock SVG ──────────────────────────────────────────── */

@@ -9,10 +9,29 @@ $user              = currentUser();
 $progress          = readProgress($user);
 $speedtestHighscore = readSpeedtestHighscore($user);
 
+$newExercises      = newExercises($CATEGORIES);
+
 function stars(int $correct): string {
     $full  = min(5, intdiv($correct, 10));
     $empty = 5 - $full;
     return '<span class="vol">' . str_repeat('★', $full) . '</span>' . str_repeat('★', $empty);
+}
+
+function exerciseTile(string $exerciseKey, array $exercise, array $progress): void {
+    $stats   = $progress[$exerciseKey] ?? null;
+    $done    = $stats['done']    ?? 0;
+    $correct = $stats['correct'] ?? 0;
+    ?>
+    <a href="exercise.php?cat=<?= $exerciseKey ?>" class="tegel">
+        <div class="oef-emoji"><?= $exercise['emoji'] ?></div>
+        <div class="oef-naam"><?= htmlspecialchars($exercise['name']) ?></div>
+        <?php if ($done > 0): ?>
+        <div class="oef-sterren" aria-label="<?= $correct ?> juist"><?= stars($correct) ?></div>
+        <?php else: ?>
+        <div class="oef-nieuw">Nieuw!</div>
+        <?php endif; ?>
+    </a>
+    <?php
 }
 
 ?>
@@ -52,25 +71,23 @@ function stars(int $correct): string {
     </div>
 </a>
 
-<?php foreach ($CATEGORIES as $catKey => $category): ?>
+<?php if ($newExercises): ?>
+<section class="vak-sectie nieuw-sectie">
+    <h2 class="vak-titel"><span>✨</span> Nieuw</h2>
+    <div class="oefeningen-grid">
+    <?php foreach ($newExercises as $exerciseKey => $exercise) exerciseTile($exerciseKey, $exercise, $progress); ?>
+    </div>
+</section>
+<?php endif; ?>
+
+<?php foreach ($CATEGORIES as $catKey => $category):
+    $rest = array_diff_key($category['exercises'], $newExercises);
+    if (!$rest) continue;
+?>
 <section class="vak-sectie">
     <h2 class="vak-titel"><span><?= $category['emoji'] ?></span> <?= htmlspecialchars($category['name']) ?></h2>
     <div class="oefeningen-grid">
-    <?php foreach ($category['exercises'] as $exerciseKey => $exercise):
-        $stats   = $progress[$exerciseKey] ?? null;
-        $done    = $stats['done']    ?? 0;
-        $correct = $stats['correct'] ?? 0;
-    ?>
-    <a href="exercise.php?cat=<?= $exerciseKey ?>" class="tegel">
-        <div class="oef-emoji"><?= $exercise['emoji'] ?></div>
-        <div class="oef-naam"><?= htmlspecialchars($exercise['name']) ?></div>
-        <?php if ($done > 0): ?>
-        <div class="oef-sterren" aria-label="<?= $correct ?> juist"><?= stars($correct) ?></div>
-        <?php else: ?>
-        <div class="oef-nieuw">Nieuw!</div>
-        <?php endif; ?>
-    </a>
-    <?php endforeach; ?>
+    <?php foreach ($rest as $exerciseKey => $exercise) exerciseTile($exerciseKey, $exercise, $progress); ?>
     </div>
 </section>
 <?php endforeach; ?>
