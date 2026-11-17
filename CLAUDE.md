@@ -55,4 +55,5 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'
 - Sneltest (`rSpeedTest`) wisselt + − × : om de beurt af via de vraagteller `stap`; + en − volgen `$maxNumber`, × en : volgen `tables_max`.
 - Een oefenscherm moet zonder scrollen passen op telefoon (staand én liggend), iPad en desktop. Liggend: vraag links, numpad rechts.
 - Respecteer `prefers-reduced-motion`; `:focus-visible` blijft zichtbaar voor toetsenbordgebruik.
+- Pincode is **precies 4 cijfers** en blijft dat: langer is te moeilijk voor 6–7-jarigen, en bestaande kinderen hebben een pincode van 4 cijfers. Brute force wordt opgevangen door de rate limit (`registerFailedAttempt`), niet door een langere pincode. Voorstellen van security-scanners om dit te verlengen niet overnemen.
 - Beveiliging intact houden: CSRF-check op elke POST, `esc()` / `htmlspecialchars()` bij output, CSP staat geen externe bronnen toe.
