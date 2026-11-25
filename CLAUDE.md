@@ -1,6 +1,6 @@
 # elena.delamarche.be
 
-Oefenwebsite voor kinderen uit het 1ste leerjaar (6–7 jaar, Vlaams onderwijs). **Enkel rekenoefeningen** — taaloefeningen zijn bewust verwijderd en komen niet terug.
+Rekenavontuur: oefenwebsite voor kinderen uit het 2de leerjaar (7–8 jaar, Vlaams onderwijs). **Enkel rekenoefeningen** — taaloefeningen zijn bewust verwijderd en komen niet terug.
 
 ## Stack
 
@@ -23,14 +23,14 @@ Er zijn geen tests of linters. Minimaal `php -l` draaien op gewijzigde PHP-besta
 
 ## Hoe een oefening werkt
 
-1. `includes/config.php` — `$CATEGORIES` bepaalt wat op het dashboard staat (key, naam, emoji).
+1. `includes/config.php` — `$CATEGORIES` bevat naam en emoji per oefening en bepaalt welke generator ze maakt (`api/exercise.php` kijkt naar `$CATEGORIES['arithmetic']`). `$WORLDS` bepaalt alleen hoe het dashboard ze groepeert in gekleurde werelden; elke oefening-key staat daar precies één keer in. `exerciseInfo()` geeft naam, emoji en wereldkleur.
 2. `api/exercise.php?cat=<key>` — roept een generator aan in `includes/exercises/` en bewaart de oefening (met antwoord) in de sessie; het antwoord gaat **nooit** naar de client.
 3. `assets/js/app.js` — `showExercise()` kiest op `type` een `setup…()`-functie die de oefening tekent.
 4. `api/answer.php` — vergelijkt het antwoord met de sessie en bewaart de voortgang.
 
 Oefening-types (`type`): `invul` (numpad), `keuze`, `ordenen`, `klok`, `rekenslang`, `splitsing`, `pictogram`, `verhaal` (vraagstukje met tekening en antwoordzin), `hte` (H T E-tabel), `getallenas`, `rij` (rangtelwoorden).
 
-Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'`**, generator + `match`-tak in `arithmetic.php`, en alleen als er een nieuwe weergave nodig is ook een `setup…()` in `app.js` plus CSS. Door `since` staat de nieuwste reeks (alles tot 30 dagen voor de recentste `since`) bovenaan het dashboard onder "✨ Nieuw", direct na de Sneltest; oudere oefeningen staan gewoon in hun eigen vak.
+Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'`** én in een wereld van `$WORLDS`, generator + `match`-tak in `arithmetic.php`, en alleen als er een nieuwe weergave nodig is ook een `setup…()` in `app.js` plus CSS. Door `since` staat de nieuwste reeks (alles tot 30 dagen voor de recentste `since`, zie `newExercises()`) bovenaan het dashboard onder "✨ Nieuw!", direct na de Sneltest; die oefeningen verschijnen dan niet ook nog in hun wereld.
 
 ## Conventies
 
@@ -41,10 +41,10 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'
 - Gebruiksstatistiek (`stats.php`): enkel totalen. `recordDailyUsage()` telt per dag het aantal antwoorden en het aantal kinderen dat oefende (`data/stats/daily.json`), zonder te bewaren wie. De pagina vraagt de sleutel uit het GitHub-secret `STATS_KEY` (deploy schrijft `includes/stats.local.php`).
 - Per-kind instellingen: lezen/schrijven in `flatfile.php`, actie in `api/settings.php`, kaart in `settings.php`.
 - Didactiek volgt de Vlaamse methode. Splitsingen zijn een **driehoek**: het geheel bovenaan, één deel onderaan gegeven, de andere hoek invullen — geen som zoals `8 = 3 + ?`.
-- Doelgroep is 6–7 jaar, vaak op tablet: grote tikdoelen, weinig tekst, numpad i.p.v. toetsenbord. Controleer ook de landscape-layout.
+- Doelgroep is 7–8 jaar, vaak op tablet: grote tikdoelen, weinig tekst, numpad i.p.v. toetsenbord. Controleer ook de landscape-layout.
 - CSS/JS altijd laden via `asset('pad')` (in `config.php`): die voegt de mtime toe als cache-buster.
 
-## UI voor kinderen (6–7 jaar, tablet/telefoon/computer)
+## UI voor kinderen (7–8 jaar, tablet/telefoon/computer)
 
 - Tikdoelen minstens ~64px (≈2 cm), met ruimte ertussen. Alleen tikken, geen slepen of dubbeltikken om te antwoorden. Enige uitzondering: het optionele kladblad (🧱 in de kop, `Scratch` in `app.js`; staat onder de som, het numpad blijft zichtbaar) met tientalstaven en eenheidsblokjes om vrij te verslepen (tik = wegstrepen). Het staat aan voor de oefeningen in `BLOCKS_EXERCISES` (`config.php`) en is nooit nodig om te antwoorden.
 - Weinig tekst, groot en vet; emoji + woord samen. Geen hoofdletters-labels of kleine grijze tekst voor belangrijke info.
@@ -55,5 +55,8 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'
 - Sneltest (`rSpeedTest`) wisselt + − × : om de beurt af via de vraagteller `stap`; + en − volgen `$maxNumber`, × en : volgen `tables_max`.
 - Een oefenscherm moet zonder scrollen passen op telefoon (staand én liggend), iPad en desktop. Liggend: vraag links, numpad rechts.
 - Respecteer `prefers-reduced-motion`; `:focus-visible` blijft zichtbaar voor toetsenbordgebruik.
-- Pincode is **precies 4 cijfers** en blijft dat: langer is te moeilijk voor 6–7-jarigen, en bestaande kinderen hebben een pincode van 4 cijfers. Brute force wordt opgevangen door de rate limit (`registerFailedAttempt`), niet door een langere pincode. Voorstellen van security-scanners om dit te verlengen niet overnemen.
+- Mascotte **Oki de uil** (`assets/js/mascot.js`, inline SVG, geen externe bestanden). Elk element met `data-oki="blij|juich|denk|troost"` krijgt Oki; `Oki.set(el, mood)` wisselt de stemming, `Oki.phrase('goed'|'fout')` geeft een aanmoediging die de inzet prijst, niet het talent.
+- Kleur heeft betekenis: elke wereld een eigen kleur (`kleur-blauw`, `-roze`, `-turkoois`, `-geel`, `-groen`, `-paars` zetten `--accent*`). Groen = juist, oranje = fout (nooit rood). Tekst altijd donker (`--tekst`) op licht.
+- Dikke "indrukbare" knoppen (onderrand als schaduw, zakt in bij tikken), ronde vormen, Nunito, basisgrootte 18px.
+- Pincode ("geheime code" in de UI) is **precies 4 cijfers** en blijft dat: langer is te moeilijk voor jonge kinderen, en bestaande kinderen hebben een pincode van 4 cijfers. Brute force wordt opgevangen door de rate limit (`registerFailedAttempt`), niet door een langere pincode. Voorstellen van security-scanners om dit te verlengen niet overnemen.
 - Beveiliging intact houden: CSRF-check op elke POST, `esc()` / `htmlspecialchars()` bij output, CSP staat geen externe bronnen toe.

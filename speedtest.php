@@ -13,12 +13,12 @@ $highscore = readSpeedtestHighscore($user);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FFF6E9">
-<title>Sneltest – Oefenwebsite</title>
+<meta name="theme-color" content="#FFFFFF">
+<title>Sneltest – Rekenavontuur</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 </head>
-<body class="oefening-pagina kleur-oranje">
+<body class="oefening-pagina kleur-geel">
 
 <header class="oef-header">
     <a href="dashboard.php" class="terug-knop" aria-label="Terug naar alle oefeningen">🏠</a>
@@ -34,39 +34,36 @@ $highscore = readSpeedtestHighscore($user);
 
     <!-- Startscherm -->
     <div id="fase-start" class="oefening-kaart kolom">
-        <div style="text-align:center;padding:.5rem 0;margin-top:auto">
-            <div style="font-size:3.5rem;line-height:1;margin-bottom:.5rem">⚡</div>
-            <div class="oef-vraag-tekst" style="font-size:2rem;margin-bottom:.5rem">Sneltest</div>
-            <p style="color:var(--tekst-zacht);font-size:1.05rem;margin-bottom:1.25rem">
-                Maak zoveel mogelijk sommen in <strong>2 minuten</strong>!<br>
-                ➕ ➖ ✖️ ➗ om de beurt
-            </p>
+        <div class="snel-intro">
+            <div class="ronde-oki" data-oki="blij"></div>
+            <div class="titel">Sneltest</div>
+            <p>Maak zoveel mogelijk sommen in <strong>2 minuten</strong>!</p>
+            <div class="bewerkingen" aria-label="plus, min, maal en delen om de beurt">
+                <span>+</span><span>−</span><span>×</span><span>:</span>
+            </div>
             <?php if ($highscore > 0): ?>
-            <p style="font-size:1rem;font-weight:800;color:var(--oranje);margin-bottom:1.25rem">
-                🏆 Jouw record: <strong><?= $highscore ?></strong>
-            </p>
+            <p class="record">🏆 Jouw record: <strong><?= $highscore ?></strong></p>
             <?php endif; ?>
         </div>
-        <button id="start-knop" class="btn btn-groen btn-groot indienen-knop" style="margin:0 auto auto">Start! ▶</button>
+        <button id="start-knop" class="btn btn-groen btn-groot snel-start-knop">Start! ▶</button>
     </div>
 
-    <!-- Actief -->
+    <!-- Bezig -->
     <div id="fase-bezig" class="oefening-kaart verborgen">
 
         <div class="snel-inhoud">
             <div class="snel-ring-wrapper">
                 <svg class="snel-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
-                    <circle cx="60" cy="60" r="50"
-                            fill="none" stroke="#e2e8f0" stroke-width="10"/>
+                    <circle class="snel-ring-achter" cx="60" cy="60" r="50" fill="none" stroke-width="12"/>
                     <circle id="ring-prog" cx="60" cy="60" r="50"
-                            fill="none" stroke="#22c55e" stroke-width="10"
+                            fill="none" stroke="#1FA968" stroke-width="12"
                             stroke-linecap="round"
                             stroke-dasharray="314.16" stroke-dashoffset="0"/>
                 </svg>
                 <div class="snel-ring-tijd" id="snel-timer">2:00</div>
             </div>
 
-            <div style="text-align:center;color:var(--tekst-zacht);font-weight:700;font-size:1rem">
+            <div class="snel-stand">
                 <span id="snel-correct">0</span> ✓ &nbsp;·&nbsp; <span id="snel-totaal">0</span> geprobeerd
             </div>
 
@@ -75,7 +72,6 @@ $highscore = readSpeedtestHighscore($user);
             <div id="snel-flash" class="snel-flash verborgen"></div>
         </div>
 
-        <!-- Numpad -->
         <div class="numpad">
             <div id="snel-display" class="numpad-display leeg">?</div>
             <div class="numpad-knoppen">
@@ -88,33 +84,23 @@ $highscore = readSpeedtestHighscore($user);
                 <button type="button" class="np-btn" data-n="1">1</button>
                 <button type="button" class="np-btn" data-n="2">2</button>
                 <button type="button" class="np-btn" data-n="3">3</button>
-                <button type="button" class="np-btn np-wis" id="snel-wis">⌫</button>
+                <button type="button" class="np-btn np-wis" id="snel-wis" aria-label="Wissen">⌫</button>
                 <button type="button" class="np-btn" data-n="0">0</button>
-                <button type="button" class="np-btn np-ok" id="snel-ok" disabled>✓</button>
+                <button type="button" class="np-btn np-ok" id="snel-ok" aria-label="Klaar" disabled>✓</button>
             </div>
         </div>
 
-    </div><!-- /fase-bezig -->
+    </div>
 
     <!-- Eindscherm -->
-    <div id="fase-klaar" class="oefening-kaart kolom verborgen">
-        <div style="text-align:center;padding:.5rem 0;margin-top:auto">
-            <div id="eind-emoji" style="font-size:3.5rem;line-height:1;margin-bottom:.5rem">🏆</div>
-            <div class="oef-vraag-tekst" style="font-size:2rem;margin-bottom:.75rem">Tijd is om!</div>
-            <div style="font-size:3.5rem;font-weight:900;color:var(--primair)">
-                <span id="eind-correct">0</span>
-                <span style="font-size:1.4rem;font-weight:700;color:var(--tekst-zacht)"> juist</span>
-            </div>
-            <div style="color:var(--tekst-zacht);font-size:1rem;margin-bottom:.5rem">
-                van <span id="eind-totaal">0</span> pogingen
-            </div>
-            <div id="eind-pct" style="font-size:1.3rem;font-weight:800;margin-bottom:.75rem"></div>
-            <div id="nieuw-record" class="verborgen"
-                 style="font-size:1.3rem;font-weight:900;color:var(--oranje);margin-bottom:.75rem">
-                🎉 Nieuw record!
-            </div>
-        </div>
-        <div class="ronde-knoppen" style="margin-bottom:auto">
+    <div id="fase-klaar" class="oefening-kaart kolom ronde-klaar verborgen">
+        <div id="eind-oki" class="ronde-oki" data-oki="juich"></div>
+        <div class="ronde-titel">Tijd is om! <span id="eind-emoji">🏆</span></div>
+        <div class="snel-eind-getal"><span id="eind-correct">0</span> <small>juist</small></div>
+        <div class="snel-eind-sub">van <span id="eind-totaal">0</span> sommen</div>
+        <div id="eind-pct" class="snel-pct"></div>
+        <div id="nieuw-record" class="nieuw-record verborgen">🎉 Nieuw record!</div>
+        <div class="ronde-knoppen">
             <button id="opnieuw-knop" class="btn btn-groen btn-groot">🔁 Nog een keer</button>
             <a href="dashboard.php" class="btn btn-primair btn-groot">🏠 Iets anders</a>
         </div>
@@ -123,6 +109,7 @@ $highscore = readSpeedtestHighscore($user);
 </main>
 
 <script src="<?= asset('assets/js/sound.js') ?>"></script>
+<script src="<?= asset('assets/js/mascot.js') ?>"></script>
 <script>
 const CSRF        = <?= json_encode($csrf) ?>;
 const DURATION    = 120;
@@ -228,9 +215,9 @@ function updateTimer() {
 
     const pct = remaining / DURATION;
     el.ringProg.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
-    el.ringProg.style.stroke = remaining > 60 ? '#22c55e'
-                             : remaining > 20 ? '#f97316'
-                             : '#ef4444';
+    el.ringProg.style.stroke = remaining > 60 ? '#1FA968'
+                             : remaining > 20 ? '#FF8A3D'
+                             : '#F0569B';
 }
 
 async function loadQuestion() {

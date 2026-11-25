@@ -24,8 +24,8 @@ $clockLevels = [
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FFF6E9">
-<title>Instellingen – Oefenwebsite</title>
+<meta name="theme-color" content="#EAF4FF">
+<title>Instellingen – Rekenavontuur</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 <meta name="csrf-token" content="<?= $csrf ?>">
@@ -36,16 +36,21 @@ $clockLevels = [
     <div class="header-inhoud">
         <a href="dashboard.php" class="terug-knop" aria-label="Terug naar alle oefeningen">🏠</a>
         <span class="header-titel">⚙️ Instellingen</span>
-        <a href="logout.php" class="btn btn-klein btn-uitlog">Stoppen 👋</a>
+        <a href="logout.php" class="btn btn-klein btn-grijs">Stoppen 👋</a>
     </div>
 </header>
 
 <main class="inst-main">
 
-    <div id="melding" class="inst-melding verborgen"></div>
+    <div class="inst-intro">
+        <div class="mini-oki" data-oki="denk"></div>
+        <p class="ballon">Hier kies je hoe moeilijk de oefeningen zijn. Doe dit samen met een grote mens! 👩‍🏫</p>
+    </div>
+
+    <div id="melding" class="inst-melding verborgen" role="status" aria-live="polite"></div>
 
     <!-- Max getal -->
-    <div class="inst-kaart">
+    <div class="inst-kaart kleur-blauw">
         <h2 class="inst-titel">➕➖ Optellen en aftrekken — tot welk getal?</h2>
         <p class="inst-omschrijving">
             Kies hoe groot de getallen mogen zijn bij optellen, aftrekken en de andere rekenoefeningen.
@@ -58,13 +63,13 @@ $clockLevels = [
             </button>
             <?php endforeach; ?>
         </div>
-        <button class="btn btn-primair" id="sla-max-op" style="margin-top:1rem">
+        <button class="btn btn-primair" id="sla-max-op">
             Opslaan
         </button>
     </div>
 
     <!-- Maaltafels -->
-    <div class="inst-kaart">
+    <div class="inst-kaart kleur-paars">
         <h2 class="inst-titel">✖️ Maaltafels en ➗ delen — tot welke tafel?</h2>
         <p class="inst-omschrijving">
             Geldt voor Maaltafels én Delen. "tot 5" oefent de tafels van 2 tot en met 5.
@@ -77,13 +82,13 @@ $clockLevels = [
             </button>
             <?php endforeach; ?>
         </div>
-        <button class="btn btn-primair" id="sla-tafels-op" style="margin-top:1rem">
+        <button class="btn btn-primair" id="sla-tafels-op">
             Opslaan
         </button>
     </div>
 
     <!-- Kloklezen niveau -->
-    <div class="inst-kaart">
+    <div class="inst-kaart kleur-groen">
         <h2 class="inst-titel">🕐 Klok lezen — moeilijkheidsgraad</h2>
         <p class="inst-omschrijving">Geldt voor Kloklezen (wijzers) én Digitale klok.</p>
         <div class="klok-niveaus" id="klok-niveaus">
@@ -96,13 +101,13 @@ $clockLevels = [
             </button>
             <?php endforeach; ?>
         </div>
-        <button class="btn btn-primair" id="sla-klok-op" style="margin-top:1rem">
+        <button class="btn btn-primair" id="sla-klok-op">
             Opslaan
         </button>
     </div>
 
     <!-- Sprongen stap -->
-    <div class="inst-kaart">
+    <div class="inst-kaart kleur-roze">
         <h2 class="inst-titel">🐸 Sprongen — stapgrootte</h2>
         <p class="inst-omschrijving">Kies hoe groot de stappen zijn bij de sprong-oefeningen.</p>
         <div class="getal-knoppen" id="sprongen-knoppen">
@@ -113,37 +118,38 @@ $clockLevels = [
             </button>
             <?php endforeach; ?>
         </div>
-        <button class="btn btn-primair" id="sla-sprongen-op" style="margin-top:1rem">
+        <button class="btn btn-primair" id="sla-sprongen-op">
             Opslaan
         </button>
     </div>
 
     <!-- Pincode wijzigen -->
-    <div class="inst-kaart">
-        <h2 class="inst-titel">🔑 Pincode wijzigen</h2>
-        <p class="inst-omschrijving">Vul je huidige pincode in en kies een nieuwe.</p>
+    <div class="inst-kaart kleur-geel">
+        <h2 class="inst-titel">🔑 Geheime code veranderen</h2>
+        <p class="inst-omschrijving">Typ eerst je code van nu en kies dan een nieuwe.</p>
 
         <div class="inst-form">
-            <label for="oude-pin">Huidige pincode:</label>
+            <label for="oude-pin">Code van nu</label>
             <input type="password" id="oude-pin" maxlength="4" inputmode="numeric"
                    pattern="\d{4}" placeholder="••••" autocomplete="current-password">
 
-            <label for="nieuwe-pin">Nieuwe pincode:</label>
+            <label for="nieuwe-pin">Nieuwe code</label>
             <input type="password" id="nieuwe-pin" maxlength="4" inputmode="numeric"
                    pattern="\d{4}" placeholder="••••" autocomplete="new-password">
 
-            <label for="herhaal-pin">Nieuwe pincode herhalen:</label>
+            <label for="herhaal-pin">Nieuwe code nog een keer</label>
             <input type="password" id="herhaal-pin" maxlength="4" inputmode="numeric"
                    pattern="\d{4}" placeholder="••••" autocomplete="new-password">
 
-            <button class="btn btn-groen" id="wijzig-pin" style="margin-top:.5rem">
-                Pincode wijzigen
+            <button class="btn btn-groen" id="wijzig-pin">
+                Code veranderen
             </button>
         </div>
     </div>
 
 </main>
 
+<script src="<?= asset('assets/js/mascot.js') ?>"></script>
 <script>
 const CSRF = <?= json_encode($csrf) ?>;
 

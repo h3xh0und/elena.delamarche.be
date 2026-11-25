@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FFF6E9">
-<title>Privacyverklaring – Oefenwebsite</title>
+<meta name="theme-color" content="#EAF4FF">
+<title>Privacyverklaring – Rekenavontuur</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 </head>
@@ -13,20 +13,19 @@
 
 <header class="site-header">
     <div class="header-inhoud">
-        <a href="<?= isLoggedIn() ? 'dashboard.php' : 'index.php' ?>" class="terug-link" style="font-weight:800">← Terug</a>
-        <span style="font-weight:800">🔒 Privacyverklaring</span>
-        <span></span>
+        <a href="<?= isLoggedIn() ? 'dashboard.php' : 'index.php' ?>" class="terug-knop" aria-label="Terug">🏠</a>
+        <span class="header-titel">🔒 Privacyverklaring</span>
     </div>
 </header>
 
-<main class="inst-main" style="max-width:720px">
+<main class="inst-main">
 
     <div class="inst-kaart">
         <h2 class="inst-titel">Wat is deze website?</h2>
         <p class="inst-omschrijving">
-            Deze oefenwebsite laat kinderen uit het eerste leerjaar rekenen oefenen.
+            Deze oefenwebsite laat kinderen uit het tweede leerjaar rekenen oefenen.
             Ze is gebouwd als een persoonlijk project en is volledig gratis en zonder reclame.
-            De broncode is <a href="https://github.com/h3xh0und/elena.delamarche.be" target="_blank" rel="noopener noreferrer" style="color:var(--primair)">open source op GitHub</a>.
+            De broncode is <a href="https://github.com/h3xh0und/elena.delamarche.be" target="_blank" rel="noopener noreferrer">open source op GitHub</a>.
         </p>
     </div>
 
@@ -101,7 +100,7 @@
     <div class="inst-kaart">
         <h2 class="inst-titel">🧒 GDPR &amp; kinderen</h2>
         <p class="inst-omschrijving">
-            Kinderen in het eerste leerjaar zijn jonger dan 13 jaar. Conform
+            Kinderen in het tweede leerjaar zijn jonger dan 13 jaar. Conform
             <strong>GDPR artikel 8</strong> raden we aan dat een ouder of leerkracht
             aanwezig is bij het aanmaken van een account. Omdat er geen e-mailadres
             of echte naam vereist is, en de gegevens uitsluitend voor educatief gebruik
@@ -111,7 +110,7 @@
         <p class="inst-omschrijving" style="margin-top:.75rem">
             Ouders of voogden kunnen op elk moment vragen om de gegevens van hun kind
             te verwijderen — stuur daarvoor een e-mail naar
-            <a href="mailto:hello@jonasdlm.be" style="color:var(--primair)">hello@jonasdlm.be</a>.
+            <a href="mailto:hello@jonasdlm.be">hello@jonasdlm.be</a>.
         </p>
     </div>
 
@@ -127,7 +126,7 @@
         <h2 class="inst-titel">Contact</h2>
         <p class="inst-omschrijving">
             Vragen, opmerkingen of een verwijderingsverzoek?<br>
-            <a href="mailto:hello@jonasdlm.be" style="color:var(--primair)">hello@jonasdlm.be</a>
+            <a href="mailto:hello@jonasdlm.be">hello@jonasdlm.be</a>
         </p>
         <p class="inst-omschrijving" style="margin-top:.5rem;color:var(--tekst-zacht);font-size:.9rem">
             Verantwoordelijke: Jonas De la Marche · Laatste aanpassing: november 2026

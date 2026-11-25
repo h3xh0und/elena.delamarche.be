@@ -19,7 +19,7 @@ const BLOCKS_EXERCISES = ['no_bridge', 'addition', 'subtraction', 'mixed', 'thre
 $CATEGORIES = [
     'arithmetic' => [
         'name'      => 'Rekenen',
-        'color'     => 'oranje',
+        'color'     => 'blauw',
         'emoji'     => '🔢',
         'exercises' => [
             // 'since': de nieuwste reeks staat bovenaan het dashboard onder "Nieuw" (zie newExercises()).
@@ -63,7 +63,7 @@ $CATEGORIES = [
     ],
     'logical_thinking' => [
         'name'      => 'Logisch denken',
-        'color'     => 'oranje',
+        'color'     => 'paars',
         'emoji'     => '🧠',
         'exercises' => [
             'more_less' => ['name' => 'Meer en minder', 'emoji' => '🔁'],
@@ -86,4 +86,40 @@ function newExercises(array $categories): array {
     $all = array_filter($all, fn($e) => strtotime($e['since']) >= $latest - 30 * 86400);
     uasort($all, fn($a, $b) => strcmp($b['since'], $a['since']));
     return $all;
+}
+
+/* Dashboard layout: smaller "worlds" (display only; $CATEGORIES stays the source
+   for names, emoji and the exercise generators). Every exercise key appears once. */
+$WORLDS = [
+    'plus_min' => ['name' => 'Plus en min',   'emoji' => '➕', 'color' => 'blauw',
+                   'exercises' => ['no_bridge', 'addition', 'subtraction', 'mixed', 'three_numbers', 'missing',
+                                   'commutative', 'true_false']],
+    'maal'     => ['name' => 'Maal en delen', 'emoji' => '✖️', 'color' => 'roze',
+                   'exercises' => ['times_tables', 'division', 'repeated', 'sign_choice', 'table_stories', 'half']],
+    'getallen' => ['name' => 'Getallen',      'emoji' => '🔢', 'color' => 'turkoois',
+                   'exercises' => ['place_value', 'number_facts', 'splitting', 'compare', 'ordering', 'neighbours']],
+    'tellen'   => ['name' => 'Tellen en springen', 'emoji' => '🦘', 'color' => 'hemel',
+                   'exercises' => ['count_on', 'jumps', 'number_line', 'ordinal', 'number_snake']],
+    'klok'     => ['name' => 'Klok en geld',  'emoji' => '🕐', 'color' => 'geel',
+                   'exercises' => ['clock', 'digital_clock', 'money']],
+    'woorden'  => ['name' => 'Woordsommen',   'emoji' => '💬', 'color' => 'groen',
+                   'exercises' => ['word_problems']],
+    'logisch'  => ['name' => 'Logisch denken','emoji' => '🧠', 'color' => 'paars',
+                   'exercises' => ['more_less', 'pictogram']],
+];
+
+/* Name, emoji and world colour of one exercise key, or null */
+function exerciseInfo(string $key): ?array {
+    global $CATEGORIES, $WORLDS;
+    foreach ($CATEGORIES as $category) {
+        if (isset($category['exercises'][$key])) {
+            $info = $category['exercises'][$key];
+            $info['color'] = $category['color'];
+            foreach ($WORLDS as $world) {
+                if (in_array($key, $world['exercises'], true)) { $info['color'] = $world['color']; break; }
+            }
+            return $info;
+        }
+    }
+    return null;
 }

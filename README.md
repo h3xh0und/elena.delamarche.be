@@ -1,6 +1,6 @@
-# Oefenwebsite 1ste leerjaar
+# Rekenavontuur — oefenwebsite 2de leerjaar
 
-A practice website for children in their first year of primary school (ages 6–7). Built for a classroom setting: multiple children share one installation, each with their own name and 4-digit PIN.
+A practice website for children in their second year of primary school (ages 7–8). Built for a classroom setting: multiple children share one installation, each with their own name and 4-digit PIN.
 
 The UI is entirely in Dutch.
 

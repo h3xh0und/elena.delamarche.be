@@ -23,14 +23,17 @@ const el = {
   question:       document.getElementById('oef-vraag'),
   extra:          document.getElementById('oef-extra'),
   feedback:       document.getElementById('feedback'),
-  fbIcon:         document.getElementById('feedback-icoon'),
+  oki:            document.getElementById('oef-oki'),
+  fbOki:          document.getElementById('feedback-oki'),
   fbMessage:      document.getElementById('feedback-bericht'),
+  fbSub:          document.getElementById('feedback-sub'),
   fbNext:         document.getElementById('feedback-verder'),
   scoreCounter:   document.getElementById('score-teller'),
   scoreCorrect:   document.getElementById('score-correct'),
   roundBar:       document.getElementById('ronde-balk'),
   roundDone:      document.getElementById('ronde-klaar'),
-  roundEmoji:     document.getElementById('ronde-emoji'),
+  roundOki:       document.getElementById('ronde-oki'),
+  roundTip:       document.getElementById('ronde-tip'),
   roundTitle:     document.getElementById('ronde-titel'),
   roundStars:     document.getElementById('ronde-sterren'),
   roundCorrect:   document.getElementById('ronde-correct'),
@@ -120,8 +123,11 @@ function showRoundEnd() {
   const stars   = correct >= 9 ? 3 : correct >= 6 ? 2 : 1;
 
   el.card.classList.add('verborgen');
-  el.roundEmoji.textContent   = stars === 3 ? '🏆' : stars === 2 ? '🎉' : '💪';
+  Oki.set(el.roundOki, stars >= 2 ? 'juich' : 'blij');
   el.roundTitle.textContent   = stars === 3 ? 'Fantastisch!' : stars === 2 ? 'Goed gedaan!' : 'Goed geoefend!';
+  el.roundTip.textContent     = stars === 3 ? 'Je was heel geconcentreerd! Durf je iets moeilijkers? 🚀'
+                              : stars === 2 ? 'Nog een ronde en misschien haal je 3 sterren!'
+                              :               'Elke ronde maakt je sterker. Probeer het nog eens! 💪';
   el.roundStars.innerHTML     = '<span class="vol">★</span>'.repeat(stars) + '★'.repeat(3 - stars);
   el.roundCorrect.textContent = correct;
   el.roundTotal.textContent   = ROUND_LENGTH;
@@ -185,6 +191,7 @@ function showExercise(data) {
     default:           setupFill(data);
   }
 
+  Oki.set(el.oki, 'denk');
   showLoading(false);
   el.card.classList.add('pop-in');
   setTimeout(() => el.card.classList.remove('pop-in'), 350);
@@ -748,8 +755,10 @@ function markAnswer(data) {
 
 function showFeedback(correct, message) {
   el.feedback.className = 'feedback ' + (correct ? 'correct' : 'incorrect');
-  el.fbIcon.textContent    = correct ? '🎉' : '🤔';
+  Oki.set(el.fbOki, correct ? 'juich' : 'troost');
+  Oki.set(el.oki,   correct ? 'juich' : 'troost');
   el.fbMessage.textContent = message;
+  el.fbSub.textContent     = Oki.phrase(correct ? 'goed' : 'fout');
   el.feedback.classList.remove('verborgen');
 
   Sound.play(correct ? 'good' : 'wrong');
