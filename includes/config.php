@@ -123,3 +123,10 @@ function exerciseInfo(string $key): ?array {
     }
     return null;
 }
+
+/* "Rekenavontuur" as rainbow letters (each letter its own colour, see .regenboog) */
+function rainbow(string $text): string {
+    $out = '';
+    foreach (mb_str_split($text) as $ch) $out .= '<span>' . htmlspecialchars($ch) . '</span>';
+    return '<span class="regenboog" aria-label="' . htmlspecialchars($text) . '">' . $out . '</span>';
+}

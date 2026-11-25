@@ -62,7 +62,7 @@ $greeting = $greetings[array_rand($greetings)];
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#EAF4FF">
+<meta name="theme-color" content="#FFC700">
 <title>Rekenavontuur</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
@@ -71,7 +71,7 @@ $greeting = $greetings[array_rand($greetings)];
 
 <header class="site-header">
     <div class="header-inhoud">
-        <div class="header-logo"><div class="mini-oki" data-oki="blij"></div><span>Rekenavontuur</span></div>
+        <div class="header-logo"><div class="mini-oki" data-oki="blij"></div><?= rainbow('Rekenavontuur') ?></div>
         <div class="header-knoppen">
             <a href="settings.php" class="icoon-knop" aria-label="Instellingen">⚙️</a>
             <a href="logout.php" class="btn btn-klein btn-grijs">Stoppen 👋</a>

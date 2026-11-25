@@ -75,7 +75,7 @@ $nameHtml = htmlspecialchars($name);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#EAF4FF">
+<meta name="theme-color" content="#4EC0FF">
 <title>Rekenavontuur – 2de leerjaar</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
@@ -85,7 +85,7 @@ $nameHtml = htmlspecialchars($name);
 <div class="auth-kaart">
     <div class="auth-oki" data-oki="<?= $step === 2 ? 'juich' : 'blij' ?>"></div>
     <div class="logo">
-        <h1><span class="woord-1">Reken</span><span class="woord-2">avontuur</span></h1>
+        <h1><?= rainbow('Rekenavontuur') ?></h1>
         <p class="logo-sub">⭐ 2de leerjaar</p>
     </div>
 
