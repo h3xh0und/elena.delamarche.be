@@ -59,6 +59,10 @@ try {
         $exercise['svg'] = clockSVG((int)$exercise['uur'], (int)($exercise['minuten'] ?? 0));
     }
 
+    if (in_array($cat, BLOCKS_EXERCISES, true)) {
+        $exercise['blokjes'] = true;
+    }
+
     $_SESSION['exercise']     = $exercise;
     $_SESSION['exercise_cat'] = $cat;
 

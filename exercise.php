@@ -43,6 +43,7 @@ $csrf     = csrfToken();
     <a href="dashboard.php" class="terug-knop" aria-label="Terug naar alle oefeningen">🏠</a>
     <div id="ronde-balk" class="ronde-balk" role="img" aria-label="Voortgang van deze ronde"></div>
     <div id="score-teller" class="score-teller" aria-label="Aantal juist">⭐ <span id="score-correct">0</span></div>
+    <button type="button" id="klad-knop" class="geluid-knop verborgen" aria-label="Blokjes om mee te rekenen" aria-pressed="false">🧱</button>
     <button type="button" id="geluid-knop" class="geluid-knop" aria-label="Geluid aan of uit">🔇</button>
 </header>
 
@@ -55,6 +56,15 @@ $csrf     = csrfToken();
             <div id="oef-label" class="oef-vraag-label" data-naam="<?= $catEmoji ?> <?= $catName ?>"></div>
             <div id="oef-vraag" class="oef-vraag-tekst"></div>
             <div id="oef-extra" class="oef-extra"></div>
+
+            <div id="klad" class="klad verborgen" aria-label="Kladblad met blokjes">
+                <div class="klad-knoppen">
+                    <button type="button" class="klad-nieuw" data-stuk="staaf" aria-label="Tiental erbij"><span class="mab-staaf mini"></span> 10</button>
+                    <button type="button" class="klad-nieuw" data-stuk="blokje" aria-label="Eenheid erbij"><span class="mab-blokje mini"></span> 1</button>
+                    <button type="button" id="klad-wis" class="klad-wis" aria-label="Alles weg">🧹</button>
+                </div>
+                <div id="klad-bord" class="klad-bord"></div>
+            </div>
 
             <div id="invul-zone" class="invoer-zone verborgen"></div>
 

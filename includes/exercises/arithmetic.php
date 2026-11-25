@@ -21,6 +21,7 @@ function generateArithmeticExercise(string $type, int $maxNumber = 20, string $c
         'missing'       => rMissing($mx),
         'commutative'   => rCommutative($mx),
         'money'         => rMoney(),
+        'no_bridge'     => rNoBridge($mx),
         'true_false'    => rTrueFalse($tablesMax),
         'sign_choice'   => rSignChoice($tablesMax),
         'repeated'      => rRepeated($tablesMax),
@@ -509,6 +510,39 @@ function rWordProblems(int $max = 20): array {
                     'antwoord' => (string)($a + $b), 'invoer' => 'getal'];
         }
     }
+}
+
+/* Optellen en aftrekken met tientallen, zonder brug over het tiental:
+   20 + 30, 90 − 40, 34 + 20, 72 − 40, 50 + 25, 85 − 45 */
+function rNoBridge(int $max = 100): array {
+    $max = max(20, $max);
+    $tens = fn(int $lo, int $hi) => rand(intdiv($lo + 9, 10), intdiv($hi, 10)) * 10;
+    for ($try = 0; $try < 200; $try++) {
+        $kind = rand(0, $max <= 20 ? 7 : 5);   // tot 20: ook 12 + 5 en 17 − 4
+        $plus = $kind % 2 === 0;
+        switch ($kind) {
+            case 0: $a = $tens(10, $max - 10); $b = $tens(10, $max - $a); break;   // T + T
+            case 1: $a = $tens(20, $max);      $b = $tens(10, $a - 10);   break;   // T − T
+            case 2: $a = rand(11, $max - 10);  $b = $tens(10, $max - $a); break;   // TE + T
+            case 3: $a = rand(21, $max);       $b = $tens(10, $a - 1);    break;   // TE − T
+            case 4: $a = rand(10, $max - 11);  $b = rand(11, $max - $a);  break;   // TE + TE
+            case 5: $a = rand(21, $max);       $b = rand(11, $a - 10);    break;   // TE − TE
+            case 6: $a = rand(11, $max - 1);   $b = rand(1, 9);           break;   // TE + E
+            default: $a = rand(11, $max);      $b = rand(1, 9);           break;   // TE − E
+        }
+        if ($a < 1 || $b < 1 || $a > $max || $b > $max) continue;
+        $result = $plus ? $a + $b : $a - $b;
+        $noBridge = $plus ? ($a % 10) + ($b % 10) <= 9 : ($a % 10) >= ($b % 10);
+        if ($noBridge && $result >= 0 && $result <= $max && ($a % 10 || $b % 10 || $kind <= 1)) {
+            return [
+                'type'     => 'invul',
+                'vraag'    => $plus ? "$a + $b = ?" : "$a − $b = ?",
+                'antwoord' => (string)$result,
+                'invoer'   => 'getal',
+            ];
+        }
+    }
+    return ['type' => 'invul', 'vraag' => '10 + 10 = ?', 'antwoord' => '20', 'invoer' => 'getal'];
 }
 
 /* ── Maal- en deeltafels: begrip (toets blok 2) ──────────── */
