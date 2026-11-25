@@ -46,7 +46,7 @@ Nieuwe oefening toevoegen: entry in `$CATEGORIES` **met `'since' => 'JJJJ-MM-DD'
 
 ## UI voor kinderen (6–7 jaar, tablet/telefoon/computer)
 
-- Tikdoelen minstens ~64px (≈2 cm), met ruimte ertussen. Alleen tikken, geen slepen of dubbeltikken om te antwoorden. Enige uitzondering: het optionele kladblad (🧱 in de kop, `Scratch` in `app.js`) met tientalstaven en eenheidsblokjes om vrij te verslepen (tik = wegstrepen). Het staat aan voor de oefeningen in `BLOCKS_EXERCISES` (`config.php`) en is nooit nodig om te antwoorden.
+- Tikdoelen minstens ~64px (≈2 cm), met ruimte ertussen. Alleen tikken, geen slepen of dubbeltikken om te antwoorden. Enige uitzondering: het optionele kladblad (🧱 in de kop, `Scratch` in `app.js`; staat onder de som, het numpad blijft zichtbaar) met tientalstaven en eenheidsblokjes om vrij te verslepen (tik = wegstrepen). Het staat aan voor de oefeningen in `BLOCKS_EXERCISES` (`config.php`) en is nooit nodig om te antwoorden.
 - Weinig tekst, groot en vet; emoji + woord samen. Geen hoofdletters-labels of kleine grijze tekst voor belangrijke info.
 - Het getypte antwoord verschijnt ín de oefening (element met klasse `antwoord-live`), niet in een apart veld.
 - Feedback meteen en vriendelijk: juist → groen + sterretjes, gaat vanzelf verder; fout → oranje (niet rood), juiste antwoord tonen, kind tikt zelf op "Verder". Geen straf, geen tijdsdruk buiten de Sneltest.

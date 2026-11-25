@@ -57,6 +57,15 @@ $csrf     = csrfToken();
             <div id="oef-vraag" class="oef-vraag-tekst"></div>
             <div id="oef-extra" class="oef-extra"></div>
 
+            <div id="klad" class="klad verborgen" aria-label="Kladblad met blokjes">
+                <div class="klad-knoppen">
+                    <button type="button" class="klad-nieuw" data-stuk="staaf" aria-label="Tiental erbij"><span class="mab-staaf mini"></span> 10</button>
+                    <button type="button" class="klad-nieuw" data-stuk="blokje" aria-label="Eenheid erbij"><span class="mab-blokje mini"></span> 1</button>
+                    <button type="button" id="klad-wis" class="klad-wis" aria-label="Alles weg">🧹</button>
+                </div>
+                <div id="klad-bord" class="klad-bord"></div>
+            </div>
+
             <div id="invul-zone" class="invoer-zone verborgen"></div>
 
             <div id="keuze-zone" class="invoer-zone verborgen">
@@ -81,16 +90,6 @@ $csrf     = csrfToken();
             <button id="indienen-knop" class="btn btn-primair btn-groot indienen-knop verborgen" disabled>
                 Controleer ✓
             </button>
-        </div>
-
-        <div id="klad" class="klad verborgen" aria-label="Kladblad met blokjes">
-            <div class="klad-knoppen">
-                <button type="button" class="klad-nieuw" data-stuk="staaf" aria-label="Tiental erbij"><span class="mab-staaf mini"></span> 10</button>
-                <button type="button" class="klad-nieuw" data-stuk="blokje" aria-label="Eenheid erbij"><span class="mab-blokje mini"></span> 1</button>
-                <button type="button" id="klad-wis" class="klad-wis" aria-label="Alles weg">🧹</button>
-            </div>
-            <div id="klad-bord" class="klad-bord"></div>
-            <button type="button" id="klad-dicht" class="btn btn-primair klad-dicht">🔢 Antwoord typen</button>
         </div>
 
         <div id="numpad" class="numpad verborgen">

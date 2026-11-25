@@ -524,7 +524,6 @@ const Scratch = {
 
   init() {
     el.scratchBtn.addEventListener('click', () => this.toggle());
-    document.getElementById('klad-dicht').addEventListener('click', () => this.toggle(false));
     document.getElementById('klad-wis').addEventListener('click', () => this.clear());
     el.scratch.querySelectorAll('.klad-nieuw').forEach(btn =>
       btn.addEventListener('click', () => this.add(btn.dataset.stuk)));
@@ -539,16 +538,10 @@ const Scratch = {
   isOpen() { return !el.scratch.classList.contains('verborgen'); },
 
   toggle(open = !this.isOpen()) {
-    if (open && !el.numpad.classList.contains('verborgen')) {
-      // Same place and size as the numpad, so the exercise doesn't move
-      el.scratch.style.minHeight = el.numpad.offsetHeight + 'px';
-      el.numpad.classList.add('verborgen');
-    } else if (!open && this.isOpen()) {
-      el.numpad.classList.remove('verborgen');
-    }
+    // Under the sum, next to the numpad: the child can lay blocks and type the answer at once
     el.scratch.classList.toggle('verborgen', !open);
     el.card.classList.toggle('klad-open', open);   // the board takes the free space
-    el.scratchBtn.textContent = open ? '🔢' : '🧱';
+    el.scratchBtn.textContent = open ? '✖️' : '🧱';
     el.scratchBtn.setAttribute('aria-pressed', open);
     if (open) this.sizeUnit();
   },

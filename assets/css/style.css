@@ -768,10 +768,9 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
   flex-direction: column;
   gap: .5rem;
   width: 100%;
-  max-width: 380px;
-  min-height: 260px;
+  max-width: 420px;
+  min-height: 0;
   margin: 0 auto;
-  flex-shrink: 0;
 }
 .klad-knoppen { display: flex; gap: .5rem; }
 .klad-nieuw, .klad-wis {
@@ -801,7 +800,6 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
   background: #fbfcff radial-gradient(circle, #dfe3ef 1px, transparent 1.5px) 0 0 / 16px 16px;
   touch-action: none;
 }
-.klad-dicht { width: 100%; min-height: 56px; font-size: 1.15rem; }
 
 .mab-staaf, .mab-blokje {
   position: absolute;
@@ -835,8 +833,10 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
 .mab-staaf.mini  { width: 60px; height: 14px; background-color: #22a046; background-image: repeating-linear-gradient(90deg, transparent 0 5px, rgba(0,0,0,.28) 5px 6px); }
 .mab-blokje.mini { --u: 14px; }
 .mab-staaf.mini::before, .mab-blokje.mini::before { display: none; }
-.klad-open .oef-inhoud { flex: 0 1 auto; }
-.klad-open .klad { flex: 1 1 auto; align-self: stretch; }
+.klad-open .oef-inhoud { justify-content: flex-start; align-self: stretch; }
+.klad-open .klad { flex: 1 1 auto; }
+.klad-bord { min-height: 120px; }
+.klad-open .oef-vraag-label { display: none; }
 #klad-knop[aria-pressed="true"] { background: var(--accent-licht); border-color: var(--accent); }
 
 /* ── Invoer zones ─────────────────────────────────────── */
@@ -1322,7 +1322,7 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
 @media (orientation: landscape) and (min-width: 560px) {
   .oefening-main { max-width: 1000px; }
   .oefening-kaart:not(.ronde-klaar):not(.kolom) { flex-direction: row; align-items: center; gap: 1.25rem; padding: 1rem 1.5rem; }
-  .numpad, .klad { width: clamp(210px, 32vw, 340px); margin: 0; min-height: 0; }
+  .numpad { width: clamp(210px, 32vw, 340px); margin: 0; }
   .oef-vraag-tekst { font-size: clamp(1.8rem, 5vw, 3.4rem); }
   .snel-ring-wrapper { width: 84px; height: 84px; }
   .snel-ring-tijd    { font-size: 1.2rem; }
@@ -1338,7 +1338,6 @@ button, .btn, .tegel, .terug-knop { user-select: none; -webkit-user-select: none
   .numpad { gap: .35rem; }
   .numpad-knoppen { gap: .35rem; }
   .numpad-display { min-height: 44px; font-size: 1.6rem; }
-  .klad-dicht { display: none; }
   .klad-nieuw, .klad-wis { min-height: 52px; }
   .keuze-knop { min-height: 56px; font-size: 1.3rem; }
   .ronde-emoji { font-size: 3rem; }
