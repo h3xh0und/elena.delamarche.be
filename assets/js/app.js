@@ -55,6 +55,10 @@ const el = {
   numpadDisplay:  document.getElementById('numpad-display'),
   numpadHint:     document.getElementById('numpad-hint'),
   npOk:           document.getElementById('np-ok'),
+  // scratch pad with base-ten blocks
+  scratchBtn:     document.getElementById('klad-knop'),
+  scratch:        document.getElementById('klad'),
+  scratchBoard:   document.getElementById('klad-bord'),
 };
 
 /* ── Init ──────────────────────────────────────────────── */
@@ -68,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el.orderingReset.addEventListener('click', resetOrdering);
   el.fbNext.addEventListener('click', next);
   el.roundAgain.addEventListener('click', startRound);
+  Scratch.init();
 
   document.getElementById('np-wis').addEventListener('click', deleteDigit);
   document.querySelectorAll('.np-btn[data-n]').forEach(btn => {
@@ -148,6 +153,7 @@ function showExercise(data) {
   state.locked        = false;
 
   hideAllZones();
+  Scratch.reset(!!data.blokjes);
   el.label.textContent = data.label || el.label.dataset.naam || '';
   el.extra.innerHTML   = '';
   el.question.classList.remove('lang-vraag');
@@ -508,6 +514,110 @@ function setupRow(data) {
   if (data.invoer === 'getal') { state.currentType = 'invul'; setupFill(data); }
   else                         { state.currentType = 'keuze'; setupChoice(data); }
 }
+
+/* ── Kladblad: tientalstaven en eenheidsblokjes ────────────
+   Enkel om te tekenen zoals in de klas, het antwoord typt het kind daarna zelf.
+   Slepen = verplaatsen, tikken = wegstrepen (en terug). */
+const Scratch = {
+  staven: 0,
+  blokjes: 0,
+
+  init() {
+    el.scratchBtn.addEventListener('click', () => this.toggle());
+    document.getElementById('klad-dicht').addEventListener('click', () => this.toggle(false));
+    document.getElementById('klad-wis').addEventListener('click', () => this.clear());
+    el.scratch.querySelectorAll('.klad-nieuw').forEach(btn =>
+      btn.addEventListener('click', () => this.add(btn.dataset.stuk)));
+  },
+
+  reset(available) {
+    this.toggle(false);
+    this.clear();
+    el.scratchBtn.classList.toggle('verborgen', !available);
+  },
+
+  isOpen() { return !el.scratch.classList.contains('verborgen'); },
+
+  toggle(open = !this.isOpen()) {
+    if (open && !el.numpad.classList.contains('verborgen')) {
+      // Same place and size as the numpad, so the exercise doesn't move
+      el.scratch.style.minHeight = el.numpad.offsetHeight + 'px';
+      el.numpad.classList.add('verborgen');
+    } else if (!open && this.isOpen()) {
+      el.numpad.classList.remove('verborgen');
+    }
+    el.scratch.classList.toggle('verborgen', !open);
+    el.card.classList.toggle('klad-open', open);   // the board takes the free space
+    el.scratchBtn.textContent = open ? '🔢' : '🧱';
+    el.scratchBtn.setAttribute('aria-pressed', open);
+    if (open) this.sizeUnit();
+  },
+
+  clear() {
+    el.scratchBoard.innerHTML = '';
+    this.staven = this.blokjes = 0;
+  },
+
+  // One cube; a ten-bar is ten of them. As big as the board allows.
+  sizeUnit() {
+    const w = el.scratchBoard.clientWidth, h = el.scratchBoard.clientHeight;
+    this.unit = Math.max(10, Math.min(28, Math.floor((h - 16) / 10), Math.floor((w - 24) / 16)));
+    el.scratchBoard.style.setProperty('--u', this.unit + 'px');
+  },
+
+  add(kind) {
+    const u = this.unit, gap = 8;
+    const w = el.scratchBoard.clientWidth, h = el.scratchBoard.clientHeight;
+    const piece = document.createElement('div');
+    piece.className = kind === 'staaf' ? 'mab-staaf' : 'mab-blokje';
+    let x, y;
+    if (kind === 'staaf') {
+      // Bars stand next to each other from the left, like in class
+      const i = this.staven++;
+      x = gap + i * (u + 6);
+      y = gap;
+    } else {
+      // Cubes in rows of five on the right
+      const i = this.blokjes++;
+      x = w - gap - (5 - (i % 5)) * (u + 4);
+      y = h - gap - (Math.floor(i / 5) + 1) * (u + 4);
+    }
+    this.place(piece, x, y);
+    el.scratchBoard.appendChild(piece);
+    this.makeDraggable(piece);
+  },
+
+  place(piece, x, y) {
+    const maxX = el.scratchBoard.clientWidth  - (piece.offsetWidth  || this.unit);
+    const maxY = el.scratchBoard.clientHeight - (piece.offsetHeight || this.unit);
+    piece.style.left = Math.max(0, Math.min(maxX, x)) + 'px';
+    piece.style.top  = Math.max(0, Math.min(maxY, y)) + 'px';
+  },
+
+  makeDraggable(piece) {
+    let start = null;
+    piece.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      piece.setPointerCapture(e.pointerId);
+      start = { x: e.clientX, y: e.clientY, left: piece.offsetLeft, top: piece.offsetTop, moved: false };
+      piece.classList.add('vast');
+    });
+    piece.addEventListener('pointermove', (e) => {
+      if (!start) return;
+      const dx = e.clientX - start.x, dy = e.clientY - start.y;
+      if (!start.moved && Math.hypot(dx, dy) < 8) return;
+      start.moved = true;
+      this.place(piece, start.left + dx, start.top + dy);
+    });
+    const end = () => {
+      if (start && !start.moved) piece.classList.toggle('weg');
+      start = null;
+      piece.classList.remove('vast');
+    };
+    piece.addEventListener('pointerup', end);
+    piece.addEventListener('pointercancel', () => { start = null; piece.classList.remove('vast'); });
+  },
+};
 
 /* ── Numpad ────────────────────────────────────────────── */
 

@@ -13,6 +13,9 @@ function asset(string $path): string {
     return $path . '?v=' . (@filemtime(__DIR__ . '/../' . $path) ?: '1');
 }
 
+/* Oefeningen waarbij het kind een kladblad met tientalstaven en eenheidsblokjes kan openen */
+const BLOCKS_EXERCISES = ['no_bridge', 'addition', 'subtraction', 'mixed', 'three_numbers', 'missing'];
+
 $CATEGORIES = [
     'arithmetic' => [
         'name'      => 'Rekenen',
@@ -20,6 +23,7 @@ $CATEGORIES = [
         'emoji'     => '🔢',
         'exercises' => [
             // 'since': de nieuwste reeks staat bovenaan het dashboard onder "Nieuw" (zie newExercises()).
+            'no_bridge'     => ['name' => 'Tot 100 zonder brug', 'emoji' => '🟩', 'since' => '2026-11-25'],
             'true_false'    => ['name' => 'Waar of niet waar?', 'emoji' => '👍', 'since' => '2026-11-15'],
             'sign_choice'   => ['name' => '× of : ?',           'emoji' => '🤔', 'since' => '2026-11-15'],
             'repeated'      => ['name' => 'Herhaald optellen en aftrekken', 'emoji' => '🔁', 'since' => '2026-11-15'],
