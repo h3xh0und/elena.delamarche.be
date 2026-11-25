@@ -15,7 +15,7 @@ function asset(string $path): string {
 $CATEGORIES = [
     'arithmetic' => [
         'name'      => 'Rekenen',
-        'color'     => 'oranje',
+        'color'     => 'blauw',
         'emoji'     => '🔢',
         'exercises' => [
             'addition'      => ['name' => 'Optellen',          'emoji' => '➕'],
@@ -48,7 +48,7 @@ $CATEGORIES = [
     ],
     'logical_thinking' => [
         'name'      => 'Logisch denken',
-        'color'     => 'oranje',
+        'color'     => 'paars',
         'emoji'     => '🧠',
         'exercises' => [
             'more_less' => ['name' => 'Meer en minder', 'emoji' => '🔁'],
@@ -56,3 +56,36 @@ $CATEGORIES = [
         ],
     ],
 ];
+
+/* Dashboard layout: smaller "worlds" (display only; $CATEGORIES stays the source
+   for names, emoji and the exercise generators). Every exercise key appears once. */
+$WORLDS = [
+    'plus_min' => ['name' => 'Plus en min',   'emoji' => '➕', 'color' => 'blauw',
+                   'exercises' => ['addition', 'subtraction', 'mixed', 'three_numbers', 'missing', 'commutative']],
+    'maal'     => ['name' => 'Maal en delen', 'emoji' => '✖️', 'color' => 'roze',
+                   'exercises' => ['times_tables', 'division', 'half']],
+    'getallen' => ['name' => 'Getallen',      'emoji' => '🔢', 'color' => 'turkoois',
+                   'exercises' => ['splitting', 'compare', 'ordering', 'neighbours', 'jumps', 'number_snake']],
+    'klok'     => ['name' => 'Klok en geld',  'emoji' => '🕐', 'color' => 'geel',
+                   'exercises' => ['clock', 'digital_clock', 'money']],
+    'woorden'  => ['name' => 'Woordsommen',   'emoji' => '💬', 'color' => 'groen',
+                   'exercises' => ['word_problems']],
+    'logisch'  => ['name' => 'Logisch denken','emoji' => '🧠', 'color' => 'paars',
+                   'exercises' => ['more_less', 'pictogram']],
+];
+
+/* Name, emoji and world colour of one exercise key, or null */
+function exerciseInfo(string $key): ?array {
+    global $CATEGORIES, $WORLDS;
+    foreach ($CATEGORIES as $category) {
+        if (isset($category['exercises'][$key])) {
+            $info = $category['exercises'][$key];
+            $info['color'] = $category['color'];
+            foreach ($WORLDS as $world) {
+                if (in_array($key, $world['exercises'], true)) { $info['color'] = $world['color']; break; }
+            }
+            return $info;
+        }
+    }
+    return null;
+}

@@ -4,9 +4,9 @@ require_once 'includes/flatfile.php';
 
 requireLogin();
 
-global $CATEGORIES;
-$user              = currentUser();
-$progress          = readProgress($user);
+global $CATEGORIES, $WORLDS;
+$user               = currentUser();
+$progress           = readProgress($user);
 $speedtestHighscore = readSpeedtestHighscore($user);
 
 function stars(int $correct): string {
@@ -15,14 +15,36 @@ function stars(int $correct): string {
     return '<span class="vol">' . str_repeat('★', $full) . '</span>' . str_repeat('★', $empty);
 }
 
+// Totals for the counters, and Oki's suggestion: an exercise that was practised least.
+$totalStars = 0;
+$anyDone    = false;
+$suggestion = null;
+$lowest     = PHP_INT_MAX;
+foreach ($CATEGORIES as $category) {
+    foreach ($category['exercises'] as $exerciseKey => $exercise) {
+        $done        = (int)($progress[$exerciseKey]['done'] ?? 0);
+        $totalStars += (int)($progress[$exerciseKey]['correct'] ?? 0);
+        $anyDone     = $anyDone || $done > 0;
+        $score       = $done * 100 + random_int(0, 99);   // random tie-break
+        if ($score < $lowest) { $lowest = $score; $suggestion = $exerciseKey; }
+    }
+}
+
+$greetings = [
+    'Waar gaan we vandaag mee oefenen?',
+    'Klaar voor een rekenavontuur?',
+    'Kies een wereld en we beginnen!',
+    'Wat wil je vandaag leren?',
+];
+$greeting = $greetings[array_rand($greetings)];
 ?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FFF6E9">
-<title>Dashboard – Oefenwebsite</title>
+<meta name="theme-color" content="#EAF4FF">
+<title>Rekenavontuur</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 </head>
@@ -30,43 +52,75 @@ function stars(int $correct): string {
 
 <header class="site-header">
     <div class="header-inhoud">
-        <span class="header-hoi">👋 Hoi, <strong><?= htmlspecialchars($user) ?></strong>!</span>
+        <div class="header-logo"><div class="mini-oki" data-oki="blij"></div><span>Rekenavontuur</span></div>
         <div class="header-knoppen">
-            <a href="settings.php" class="btn btn-klein btn-uitlog" title="Instellingen" aria-label="Instellingen">⚙️</a>
-            <a href="logout.php" class="btn btn-klein btn-uitlog">Stoppen 👋</a>
+            <a href="settings.php" class="icoon-knop" aria-label="Instellingen">⚙️</a>
+            <a href="logout.php" class="btn btn-klein btn-grijs">Stoppen 👋</a>
         </div>
     </div>
 </header>
 
 <main class="dashboard">
 
-<a href="speedtest.php" class="tegel sneltest-kaart">
-    <div class="oef-emoji">⚡</div>
-    <div>
-        <div class="oef-naam">Sneltest</div>
-        <?php if ($speedtestHighscore > 0): ?>
-        <div class="oef-nieuw">🏆 Record: <?= $speedtestHighscore ?></div>
-        <?php else: ?>
-        <div class="oef-nieuw">Hoeveel sommen in 2 minuten?</div>
-        <?php endif; ?>
+<section class="dash-hero">
+    <div class="dash-oki" data-oki="blij"></div>
+    <div class="ballon">
+        Hoi <strong><?= htmlspecialchars($user) ?></strong>! <?= htmlspecialchars($greeting) ?>
+        <div class="teller-rij">
+            <span class="teller" aria-label="<?= $totalStars ?> sommen juist">⭐ <?= $totalStars ?> juist</span>
+            <?php if ($speedtestHighscore > 0): ?>
+            <span class="teller paars">🏆 Record <?= $speedtestHighscore ?></span>
+            <?php endif; ?>
+        </div>
     </div>
-</a>
+</section>
 
-<?php foreach ($CATEGORIES as $catKey => $category): ?>
-<section class="vak-sectie">
-    <h2 class="vak-titel"><span><?= $category['emoji'] ?></span> <?= htmlspecialchars($category['name']) ?></h2>
+<section class="snel-acties" aria-label="Snel beginnen">
+    <a href="speedtest.php" class="actie-kaart sneltest">
+        <span class="actie-icoon">⚡</span>
+        <span>
+            <span class="actie-titel">Sneltest</span><br>
+            <span class="actie-sub"><?= $speedtestHighscore > 0 ? 'Kan je je record breken?' : 'Hoeveel sommen in 2 minuten?' ?></span>
+        </span>
+    </a>
+    <?php if ($suggestion): ?>
+    <a href="exercise.php?cat=<?= $suggestion ?>" class="actie-kaart verras">
+        <span class="actie-icoon">🎲</span>
+        <span>
+            <span class="actie-titel">Oki kiest!</span><br>
+            <span class="actie-sub">Een verrassing voor jou</span>
+        </span>
+    </a>
+    <?php endif; ?>
+</section>
+
+<?php foreach ($WORLDS as $worldKey => $world):
+    $count = count($world['exercises']);
+    $tried = 0;
+    foreach ($world['exercises'] as $k) if (($progress[$k]['done'] ?? 0) > 0) $tried++;
+?>
+<section class="wereld kleur-<?= $world['color'] ?>" aria-labelledby="wereld-<?= $worldKey ?>">
+    <div class="wereld-kop">
+        <div class="wereld-badge" aria-hidden="true"><?= $world['emoji'] ?></div>
+        <div>
+            <h2 class="wereld-titel" id="wereld-<?= $worldKey ?>"><?= htmlspecialchars($world['name']) ?></h2>
+            <div class="wereld-voortgang"><?= $tried ?> van <?= $count ?> geprobeerd</div>
+            <div class="wereld-balk" aria-hidden="true"><span style="width:<?= round($tried / max(1, $count) * 100) ?>%"></span></div>
+        </div>
+    </div>
     <div class="oefeningen-grid">
-    <?php foreach ($category['exercises'] as $exerciseKey => $exercise):
-        $stats   = $progress[$exerciseKey] ?? null;
-        $done    = $stats['done']    ?? 0;
-        $correct = $stats['correct'] ?? 0;
+    <?php foreach ($world['exercises'] as $exerciseKey):
+        $exercise = exerciseInfo($exerciseKey);
+        if (!$exercise) continue;
+        $done     = $progress[$exerciseKey]['done']    ?? 0;
+        $correct  = $progress[$exerciseKey]['correct'] ?? 0;
     ?>
     <a href="exercise.php?cat=<?= $exerciseKey ?>" class="tegel">
-        <div class="oef-emoji"><?= $exercise['emoji'] ?></div>
+        <div class="oef-emoji" aria-hidden="true"><?= $exercise['emoji'] ?></div>
         <div class="oef-naam"><?= htmlspecialchars($exercise['name']) ?></div>
         <?php if ($done > 0): ?>
         <div class="oef-sterren" aria-label="<?= $correct ?> juist"><?= stars($correct) ?></div>
-        <?php else: ?>
+        <?php elseif ($anyDone): ?>
         <div class="oef-nieuw">Nieuw!</div>
         <?php endif; ?>
     </a>
@@ -83,5 +137,6 @@ function stars(int $correct): string {
     <a href="https://github.com/h3xh0und/elena.delamarche.be" target="_blank" rel="noopener noreferrer">Open source op GitHub ↗</a>
 </footer>
 
+<script src="<?= asset('assets/js/mascot.js') ?>"></script>
 </body>
 </html>

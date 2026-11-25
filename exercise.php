@@ -7,15 +7,8 @@ requireLogin();
 global $CATEGORIES;
 $cat = preg_replace('/[^a-z0-9_]/', '', $_GET['cat'] ?? '');
 
-$found    = null;
-$catColor = 'oranje';
-foreach ($CATEGORIES as $catKey => $category) {
-    if (isset($category['exercises'][$cat])) {
-        $found    = $category['exercises'][$cat];
-        $catColor = $category['color'];
-        break;
-    }
-}
+$found    = $cat ? exerciseInfo($cat) : null;
+$catColor = $found['color'] ?? 'blauw';
 
 if (!$cat || !$found) {
     header('Location: dashboard.php');
@@ -31,8 +24,8 @@ $csrf     = csrfToken();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FFF6E9">
-<title><?= $catName ?> – Oefenwebsite</title>
+<meta name="theme-color" content="#FFFFFF">
+<title><?= $catName ?> – Rekenavontuur</title>
 <link rel="stylesheet" href="<?= asset('assets/css/fonts.css') ?>">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 <meta name="csrf-token" content="<?= $csrf ?>">
@@ -47,12 +40,15 @@ $csrf     = csrfToken();
 </header>
 
 <main class="oefening-main">
-    <div id="laad-indicator" class="laad-indicator">Even laden...</div>
+    <div id="laad-indicator" class="laad-indicator">Even laden…</div>
 
     <div id="oefening-kaart" class="oefening-kaart verborgen">
 
         <div class="oef-inhoud">
-            <div id="oef-label" class="oef-vraag-label" data-naam="<?= $catEmoji ?> <?= $catName ?>"></div>
+            <div class="oef-kop">
+                <div id="oef-oki" class="oef-oki" data-oki="denk"></div>
+                <div id="oef-label" class="oef-vraag-label" data-naam="<?= $catEmoji ?> <?= $catName ?>"></div>
+            </div>
             <div id="oef-vraag" class="oef-vraag-tekst"></div>
             <div id="oef-extra" class="oef-extra"></div>
 
@@ -64,7 +60,7 @@ $csrf     = csrfToken();
 
             <div id="ordenen-zone" class="invoer-zone verborgen">
                 <div id="ordenen-rij" class="ordenen-rij"></div>
-                <div class="ordenen-label">Jouw volgorde:</div>
+                <div class="ordenen-label">👇 Jouw volgorde</div>
                 <div id="ordenen-antwoord" class="ordenen-antwoord"></div>
                 <button type="button" class="btn btn-klein btn-grijs" id="ordenen-reset">↩ Opnieuw</button>
             </div>
@@ -104,10 +100,11 @@ $csrf     = csrfToken();
     </div>
 
     <div id="ronde-klaar" class="oefening-kaart ronde-klaar verborgen">
-        <div id="ronde-emoji" class="ronde-emoji">🏆</div>
+        <div id="ronde-oki" class="ronde-oki" data-oki="juich"></div>
         <div id="ronde-titel" class="ronde-titel">Klaar!</div>
         <div id="ronde-sterren" class="ronde-sterren" aria-hidden="true"></div>
         <div class="ronde-score"><strong id="ronde-correct">0</strong> van de <span id="ronde-totaal">10</span> juist</div>
+        <div id="ronde-tip" class="ronde-tip"></div>
         <div class="ronde-knoppen">
             <button type="button" id="ronde-opnieuw" class="btn btn-groen btn-groot">🔁 Nog een keer</button>
             <a href="dashboard.php" class="btn btn-primair btn-groot">🏠 Iets anders</a>
@@ -115,8 +112,11 @@ $csrf     = csrfToken();
     </div>
 
     <div id="feedback" class="feedback verborgen" role="status" aria-live="polite">
-        <div id="feedback-icoon" class="feedback-icoon"></div>
-        <div id="feedback-bericht" class="feedback-bericht"></div>
+        <div id="feedback-oki" class="feedback-oki" data-oki="juich"></div>
+        <div class="feedback-tekst">
+            <div id="feedback-bericht" class="feedback-bericht"></div>
+            <div id="feedback-sub" class="feedback-sub"></div>
+        </div>
         <button type="button" id="feedback-verder" class="btn btn-primair btn-groot">Verder →</button>
     </div>
 </main>
@@ -126,6 +126,7 @@ $csrf     = csrfToken();
     const CSRF      = <?= json_encode($csrf) ?>;
 </script>
 <script src="<?= asset('assets/js/sound.js') ?>"></script>
+<script src="<?= asset('assets/js/mascot.js') ?>"></script>
 <script src="<?= asset('assets/js/app.js') ?>"></script>
 
 </body>
